@@ -3,7 +3,7 @@ from platform import python_version
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
-from triggers.pl_python.builder import get_python_info
+from django_plpy.pl_python.builder import get_python_info
 
 
 class Command(BaseCommand):

@@ -13,7 +13,7 @@ def pl_max(a: int,
 
 @pltrigger(event="INSERT",
            when="BEFORE",
-           table="triggers_book")
+           table="books_book")
 def pl_trigger(td, plpy):
     td['new']['name'] = td['new']['name'] + 'test'
 

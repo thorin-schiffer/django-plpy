@@ -3,7 +3,7 @@ from django.db import connection
 from django.db.models import Func, F, Transform
 from pytest import fixture
 from django.db.models import IntegerField
-
+import os
 from tests.books.models import Book
 from django_plpy.pl_python.builder import build_pl_function, install_function, plfunction, pl_functions, \
     build_pl_trigger_function, pltrigger, pl_triggers, load_env, load_project, load_django
@@ -16,8 +16,15 @@ def book(db):
 
 @fixture
 def pl_simple_function():
-    with open('pl_python/simple_function.sql', 'r') as f:
-        return f.read()
+    return """
+CREATE FUNCTION pl_max (a integer, b integer)
+  RETURNS integer
+AS $$
+  if a > b:
+    return a
+  return b
+$$ LANGUAGE plpython3u;
+"""
 
 
 def test_simple_function(pl_simple_function, db):
@@ -85,7 +92,7 @@ def test_plfunction_decorator_registers():
 def pl_trigger(td, plpy):
     # mind triggers don't return anything
     td['new']['name'] = td['new']['name'] + 'test'
-    td['new']['amount_sold'] = plpy.execute("SELECT count(*) FROM triggers_book")[0]['count']
+    td['new']['amount_sold'] = plpy.execute("SELECT count(*) FROM books_book")[0]['count']
 
 
 def test_generate_trigger_function(db):
@@ -93,7 +100,7 @@ def test_generate_trigger_function(db):
         pl_trigger,
         event="INSERT",
         when="BEFORE",
-        table="triggers_book"
+        table="books_book"
     )
     with connection.cursor() as cursor:
         cursor.execute(pl_python_trigger_function)
@@ -106,13 +113,13 @@ def test_generate_trigger_function(db):
 def test_pltrigger_decorator_registers():
     @pltrigger(event="INSERT",
                when="BEFORE",
-               table="triggers_book")
+               table="books_book")
     def pl_trigger(td, plpy):
         td['new']['name'] = td['new']['name'] + 'test'
 
     f, params = list(pl_triggers.values())[0]
     assert f.__name__ == 'pl_trigger'
-    assert params == {'event': "INSERT", 'when': "BEFORE", 'table': "triggers_book"}
+    assert params == {'event': "INSERT", 'when': "BEFORE", 'table': "books_book"}
 
 
 def test_use_env(db):
@@ -147,7 +154,7 @@ def test_initialize_django_project(db):
     load_django("testapp.settings")
 
     def pl_test_import_project() -> int:
-        from tests.books import Book
+        from books.models import Book
         # still uses tcp connection with postgres itself
         return Book.objects.count()
 
@@ -160,7 +167,7 @@ def test_initialize_django_project(db):
 
 @fixture
 def pl_django(db):
-    load_django('testapp.settings')
+    load_django('tests.testapp.settings')
 
 
 def test_trigger_model(pl_django):
