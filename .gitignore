@@ -55,3 +55,6 @@ MANIFEST
 
 # Django
 /*.sqlite3
+
+# dotenv
+**.env
