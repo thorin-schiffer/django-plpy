@@ -1,9 +1,10 @@
+import os
+
 import django
 from django.db import connection
 from django.db.models import Func, F, Transform
 from pytest import fixture
 from django.db.models import IntegerField
-import os
 from tests.books.models import Book
 from django_plpy.pl_python.builder import build_pl_function, install_function, plfunction, pl_functions, \
     build_pl_trigger_function, pltrigger, pl_triggers, load_env, load_project, load_django, load_path
@@ -166,6 +167,7 @@ def test_initialize_django_project(db, pl_django):
 
 @fixture
 def pl_django(db, settings):
+    load_path(os.path.join(settings.BASE_DIR.parent, 'src'))
     load_django('tests.testapp.settings', project_path=settings.BASE_DIR.parent)
 
 

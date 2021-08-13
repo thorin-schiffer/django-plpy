@@ -151,8 +151,7 @@ def load_env():
 def load_project(path=None):
     install_function(pl_load_path)
     path = path or settings.BASE_DIR
-    with connection.cursor() as cursor:
-        cursor.execute(f"select pl_load_path('{path}')")
+    load_path(path)
 
 
 @plfunction
