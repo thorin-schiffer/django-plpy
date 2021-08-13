@@ -154,7 +154,7 @@ def test_import_project(db):
 
 def test_initialize_django_project(db, pl_django):
     def pl_test_import_project() -> int:
-        from books.models import Book
+        from tests.books.models import Book
         # still uses tcp connection with postgres itself
         return Book.objects.count()
 
