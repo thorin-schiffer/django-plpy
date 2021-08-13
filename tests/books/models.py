@@ -1,6 +1,6 @@
 from django.db.models import Model, CharField, IntegerField, Func, F
 
-from triggers.pl_python.builder import plfunction, pltrigger
+from django_plpy.pl_python.builder import plfunction, pltrigger
 
 
 @plfunction
