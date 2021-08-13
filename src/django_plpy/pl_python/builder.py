@@ -130,25 +130,27 @@ def pltrigger(**trigger_parameters):
 
 
 @plfunction
-def pl_load_path(syspath: str):
+def pl_load_path(path: str):
     import sys
-    sys.path.append(syspath)
+    sys.path.append(path)
+
+
+def load_path(path):
+    install_function(pl_load_path)
+    with connection.cursor() as cursor:
+        cursor.execute(f"select pl_load_path('{path}')")
 
 
 def load_env():
     """
     Installs and loads the virtualenv of this project into the postgres interpreter.
     """
+    load_path(get_python_lib())
+
+
+def load_project(path=None):
     install_function(pl_load_path)
-    path = get_python_lib()
-    with connection.cursor() as cursor:
-        cursor.execute(f"select pl_load_path('{path}')")
-
-
-def load_project():
-    install_function(pl_load_path)
-    path = settings.BASE_DIR
-
+    path = path or settings.BASE_DIR
     with connection.cursor() as cursor:
         cursor.execute(f"select pl_load_path('{path}')")
 
@@ -162,12 +164,12 @@ def pl_load_django(project_dir: str, django_settings_module: str):
     get_wsgi_application()
 
 
-def load_django(setting_module):
+def load_django(setting_module, project_path=None):
     load_env()
-    load_project()
+    load_project(project_path)
     install_function(pl_load_django)
     with connection.cursor() as cursor:
-        cursor.execute(f"select pl_load_django('{settings.BASE_DIR}', '{setting_module}')")
+        cursor.execute(f"select pl_load_django('{project_path}', '{setting_module}')")
 
 
 @plfunction

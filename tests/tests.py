@@ -6,7 +6,7 @@ from django.db.models import IntegerField
 import os
 from tests.books.models import Book
 from django_plpy.pl_python.builder import build_pl_function, install_function, plfunction, pl_functions, \
-    build_pl_trigger_function, pltrigger, pl_triggers, load_env, load_project, load_django
+    build_pl_trigger_function, pltrigger, pl_triggers, load_env, load_project, load_django, load_path
 
 
 @fixture
@@ -36,7 +36,7 @@ def test_simple_function(pl_simple_function, db):
 
 
 def pl_max(a: int,
-          b: int) -> int:
+           b: int) -> int:
     if a > b:
         return a
     return b
@@ -65,7 +65,8 @@ def test_call_simple_function_from_django_orm(simple_function, book):
 
 def test_custom_lookup_with_function(simple_function, book):
     def plsquare(a: int) -> int:
-        return a*a
+        return a * a
+
     install_function(plsquare)
 
     class PySquare(Transform):
@@ -81,7 +82,7 @@ def test_custom_lookup_with_function(simple_function, book):
 def test_plfunction_decorator_registers():
     @plfunction
     def pl_max(a: int,
-              b: int) -> int:
+               b: int) -> int:
         if a > b:
             return a
         return b
@@ -150,9 +151,7 @@ def test_import_project(db):
     assert row[0] == 20
 
 
-def test_initialize_django_project(db):
-    load_django("testapp.settings")
-
+def test_initialize_django_project(db, pl_django):
     def pl_test_import_project() -> int:
         from books.models import Book
         # still uses tcp connection with postgres itself
@@ -166,8 +165,8 @@ def test_initialize_django_project(db):
 
 
 @fixture
-def pl_django(db):
-    load_django('tests.testapp.settings')
+def pl_django(db, settings):
+    load_django('tests.testapp.settings', project_path=settings.BASE_DIR.parent)
 
 
 def test_trigger_model(pl_django):
