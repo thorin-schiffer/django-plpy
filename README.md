@@ -17,5 +17,7 @@ information on PyScaffold see https://pyscaffold.org/.
 
 ## Installation for development
 
+Install project locally: `pip install -e .`
+
 Django-plpy [django-environ](https://github.com/joke2k/django-environ) for passing the necessary env
 over dotenv, database for creds in particular. See .env_template for possible env variables.
