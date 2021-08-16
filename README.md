@@ -1,6 +1,6 @@
 # django-plpy
 
-Django utilities for Postgres PL/Python
+Django utilities for Postgres PL/Python. Work in progress 
 
 ## Description
 
