@@ -1,7 +1,9 @@
 import inspect
+import json
 from distutils.sysconfig import get_python_lib
 from functools import wraps
 from textwrap import dedent
+from typing import Dict
 
 from django.conf import settings
 from django.db import connection
@@ -9,7 +11,8 @@ from django.db import connection
 type_mapper = {
     int: "integer",
     str: "varchar",
-    inspect._empty: "void"
+    inspect._empty: "void",
+    Dict[str, str]: "JSONB"
 }
 
 
@@ -25,22 +28,29 @@ def build_pl_function(f):
     name = f.__name__
     signature = inspect.signature(f)
     try:
-        args = []
+        pl_args = []
+        python_args = []
         for arg, specs in signature.parameters.items():
             if specs.annotation not in type_mapper:
                 raise RuntimeError(f"Unknown type {specs.annotation}")
-            args.append(f"{arg} {type_mapper[specs.annotation]}")
+            pl_args.append(f"{arg} {type_mapper[specs.annotation]}")
+            if specs.annotation == Dict[str, str]:
+                python_args.append(f"json.loads({arg})")
+            else:
+                python_args.append(arg)
     except KeyError as ex:
         raise RuntimeError(f"{ex}:"
                            f"Function {f} must be fully annotated to be translated to pl/python")
 
-    header = f"CREATE OR REPLACE FUNCTION {name} ({','.join(args)}) RETURNS {type_mapper[signature.return_annotation]}"
+    header = f"CREATE OR REPLACE FUNCTION {name} ({','.join(pl_args)}) RETURNS {type_mapper[signature.return_annotation]}"
 
     body = remove_decorator(inspect.getsource(f), "plfunction")
     return f"""{header}
 AS $$
+from typing import Dict
+import json
 {dedent(body)}
-return {name}({','.join(signature.parameters.keys())})
+return {name}({','.join(python_args)})
 $$ LANGUAGE plpython3u
 """
 
@@ -58,6 +68,7 @@ def build_pl_trigger_function(f, event, when, table=None, model=None):
         import_statement = f"""
 from django.apps import apps
 from django.forms.models import model_to_dict
+
 {model_name} = apps.get_model('{app_name}', '{model_name}')
 new = {model_name}(**TD['new'])
 old = {model_name}(**TD['old']) if TD['old'] else None 
@@ -155,20 +166,24 @@ def load_project(path=None):
 
 
 @plfunction
-def pl_load_django(project_dir: str, django_settings_module: str):
+def pl_load_django(project_dir: str, django_settings_module: str, extra_env: Dict[str, str]):
     import os, sys
+    os.environ.update(**extra_env)
     from django.core.wsgi import get_wsgi_application
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', django_settings_module)
     sys.path.append(project_dir)
     get_wsgi_application()
 
 
-def load_django(setting_module, project_path=None):
+def load_django(setting_module, project_path=None, extra_env=None):
     load_env()
     load_project(project_path)
     install_function(pl_load_django)
+    extra_env = extra_env or {}
+
     with connection.cursor() as cursor:
-        cursor.execute(f"select pl_load_django('{project_path}', '{setting_module}')")
+        cursor.execute(f"select pl_load_django('{project_path}', '{setting_module}', "
+                       f"'{json.dumps(extra_env)}')")
 
 
 @plfunction
