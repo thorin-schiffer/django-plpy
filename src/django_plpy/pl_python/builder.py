@@ -43,10 +43,15 @@ def build_pl_function(f):
             else:
                 python_args.append(arg)
     except KeyError as ex:
-        raise RuntimeError(f"{ex}:"
-                           f"Function {f} must be fully annotated to be translated to pl/python")
+        raise RuntimeError(
+            f"{ex}:"
+            f"Function {f} must be fully annotated to be translated to pl/python"
+        )
 
-    header = f"CREATE OR REPLACE FUNCTION {name} ({','.join(pl_args)}) RETURNS {type_mapper[signature.return_annotation]}"
+    header = (
+        f"CREATE OR REPLACE FUNCTION {name} ({','.join(pl_args)}) "
+        f"RETURNS {type_mapper[signature.return_annotation]}"
+    )
 
     body = remove_decorator(inspect.getsource(f), "plfunction")
     return f"""{header}
@@ -75,10 +80,10 @@ from django.forms.models import model_to_dict
 
 {model_name} = apps.get_model('{app_name}', '{model_name}')
 new = {model_name}(**TD['new'])
-old = {model_name}(**TD['old']) if TD['old'] else None 
+old = {model_name}(**TD['old']) if TD['old'] else None
 """
         call_statement = f"{name}(new, old, TD, plpy)"
-        back_convert_statement = f"""
+        back_convert_statement = """
 TD['new'].update(model_to_dict(new))
 if TD['old']:
     TD['old'].update(model_to_dict(old))
@@ -101,7 +106,7 @@ AS $$
 return 'MODIFY'
 $$ LANGUAGE plpython3u;
 
-DROP TRIGGER IF EXISTS {name + '_trigger'} ON {table} CASCADE; 
+DROP TRIGGER IF EXISTS {name + '_trigger'} ON {table} CASCADE;
 CREATE TRIGGER {name + '_trigger'}
 {when} {event} ON {table}
 FOR EACH ROW
@@ -112,7 +117,11 @@ END;
 
 def install_function(f, trigger_params=None):
     trigger_params = trigger_params or {}
-    pl_python_function = build_pl_trigger_function(f, **trigger_params) if trigger_params else build_pl_function(f)
+    pl_python_function = (
+        build_pl_trigger_function(f, **trigger_params)
+        if trigger_params
+        else build_pl_function(f)
+    )
     with connection.cursor() as cursor:
         cursor.execute(pl_python_function)
 
@@ -138,7 +147,10 @@ def pltrigger(**trigger_parameters):
             return f(*args, **kwargs)
 
         module = inspect.getmodule(installed_func)
-        pl_triggers[f"{module.__name__}.{installed_func.__qualname__}"] = installed_func, trigger_parameters
+        pl_triggers[f"{module.__name__}.{installed_func.__qualname__}"] = (
+            installed_func,
+            trigger_parameters,
+        )
         return installed_func
 
     return _pl_trigger
@@ -147,6 +159,7 @@ def pltrigger(**trigger_parameters):
 @plfunction
 def pl_load_path(path: str):
     import sys
+
     sys.path.append(path)
 
 
@@ -170,11 +183,16 @@ def load_project(path=None):
 
 
 @plfunction
-def pl_load_django(project_dir: str, django_settings_module: str, extra_env: Dict[str, str]):
-    import os, sys
+def pl_load_django(
+    project_dir: str, django_settings_module: str, extra_env: Dict[str, str]
+):
+    import os
+    import sys
+
     os.environ.update(**extra_env)
     from django.core.wsgi import get_wsgi_application
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', django_settings_module)
+
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", django_settings_module)
     sys.path.append(project_dir)
     get_wsgi_application()
 
@@ -186,21 +204,22 @@ def load_django(setting_module, project_path=None, extra_env=None):
     extra_env = extra_env or {}
 
     with connection.cursor() as cursor:
-        cursor.execute(f"select pl_load_django('{project_path}', '{setting_module}', "
-                       f"'{json.dumps(extra_env)}')")
+        cursor.execute(
+            f"select pl_load_django('{project_path}', '{setting_module}', "
+            f"'{json.dumps(extra_env)}')"
+        )
 
 
 @plfunction
 def pl_python_version() -> str:
     from platform import python_version
+
     return python_version()
 
 
 def get_python_info():
     install_function(pl_python_version)
     with connection.cursor() as cursor:
-        cursor.execute(f"select pl_python_version()")
-        info = {
-            'version': cursor.fetchone()[0]
-        }
+        cursor.execute("select pl_python_version()")
+        info = {"version": cursor.fetchone()[0]}
     return info

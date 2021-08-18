@@ -1,11 +1,11 @@
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
 from django.db import transaction
 
 from django_plpy.pl_python.builder import pl_functions, install_function, pl_triggers
 
 
 class Command(BaseCommand):
-    help = 'Syncs PL/Python functions, decorated with @plfunction and @pltrigger'
+    help = "Syncs PL/Python functions, decorated with @plfunction and @pltrigger"
 
     @transaction.atomic
     def handle(self, *args, **options):

@@ -4,18 +4,15 @@ from django_plpy.pl_python.builder import plfunction, pltrigger
 
 
 @plfunction
-def pl_max(a: int,
-          b: int) -> int:
+def pl_max(a: int, b: int) -> int:
     if a > b:
         return a
     return b
 
 
-@pltrigger(event="INSERT",
-           when="BEFORE",
-           table="books_book")
+@pltrigger(event="INSERT", when="BEFORE", table="books_book")
 def pl_trigger(td, plpy):
-    td['new']['name'] = td['new']['name'] + 'test'
+    td["new"]["name"] = td["new"]["name"] + "test"
 
 
 class Book(Model):
@@ -24,6 +21,10 @@ class Book(Model):
     amount_sold = IntegerField(default=10)
 
     def get_max(self):
-        return Book.objects.annotate(
-            max_value=Func(F('amount_sold'), F('amount_stock'), function='pl_max')
-        ).get(pk=self.pk).max_value
+        return (
+            Book.objects.annotate(
+                max_value=Func(F("amount_sold"), F("amount_stock"), function="pl_max")
+            )
+            .get(pk=self.pk)
+            .max_value
+        )
