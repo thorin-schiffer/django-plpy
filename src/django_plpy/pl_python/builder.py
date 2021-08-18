@@ -3,7 +3,7 @@ import json
 from distutils.sysconfig import get_python_lib
 from functools import wraps
 from textwrap import dedent
-from typing import Dict
+from typing import Dict, List
 
 from django.conf import settings
 from django.db import connection
@@ -12,7 +12,11 @@ type_mapper = {
     int: "integer",
     str: "varchar",
     inspect._empty: "void",
-    Dict[str, str]: "JSONB"
+    Dict[str, str]: "JSONB",
+    List[str]: "varchar[]",
+    List[int]: "int[]",
+    bool: "boolean",
+    float: "real",
 }
 
 
@@ -47,7 +51,7 @@ def build_pl_function(f):
     body = remove_decorator(inspect.getsource(f), "plfunction")
     return f"""{header}
 AS $$
-from typing import Dict
+from typing import Dict, List
 import json
 {dedent(body)}
 return {name}({','.join(python_args)})

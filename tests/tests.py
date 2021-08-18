@@ -1,4 +1,5 @@
 import os
+from typing import List
 
 import django
 from django.db import connection
@@ -196,3 +197,19 @@ def test_trigger_model(pl_django):
     book = Book.objects.create(name='book')
     book.refresh_from_db()
     assert book.name == 'booktest'
+
+
+def test_function_different_arguments(db):
+    def pl_test_arguments(
+            list_str: List[str],
+            list_int: List[int],
+            flag: bool,
+            number: float
+    ) -> int:
+        return 1
+
+    install_function(pl_test_arguments)
+    with connection.cursor() as cursor:
+        cursor.callproc('pl_test_arguments', [
+            ["a", "b"], [1, 2], True, 1.5
+        ])
