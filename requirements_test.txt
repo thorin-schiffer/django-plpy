@@ -3,4 +3,5 @@ pytest-cov
 pytest-django
 django-environ
 tox
+tox-pyenv
 django-extensions

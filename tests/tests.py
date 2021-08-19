@@ -1,4 +1,5 @@
 import os
+import sys
 from typing import List
 
 import django
@@ -162,6 +163,10 @@ def test_import_project(db):
 
 
 @mark.django_db(transaction=True)
+@mark.skipif(
+    sys.version_info != (3, 6),
+    reason="requires python3.6, because this is the default postgres10 version",
+)
 def test_initialize_django_project(db, pl_django):
     # this is needed because the request within the trigger won't see the changes if the db is not transactional
     Book.objects.all().delete()
@@ -195,6 +200,10 @@ def pl_django(db, settings):
     )
 
 
+@mark.skipif(
+    sys.version_info != (3, 6),
+    reason="requires python3.6, because this is the default postgres10 version",
+)
 def test_trigger_model(pl_django):
     def pl_trigger(new: Book, old: Book, td, plpy):
         # don't use save method here, it will kill the database because of recursion

@@ -30,7 +30,7 @@ Django utilities for Postgres PL/Python. Work in progress
 - often django beginners misunderstand signals concept
 - add sorting example with a custom python function
 - plpy example for triggers
-
+- if you see `Error loading psycopg2 module: No module named 'psycopg2._psycopg'`, your local python and db's versions don't match
 - including ORM will only work when django project is on the same host, which is rare. the only real way is to install the whole code on the db host
 - there is certain danger of getting them out of hand
 

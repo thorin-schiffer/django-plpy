@@ -58,3 +58,6 @@ MANIFEST
 
 # dotenv
 **.env
+
+# pyenv
+.python-version
