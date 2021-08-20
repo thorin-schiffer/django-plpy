@@ -17,6 +17,9 @@ jobs:
         image: postgres
         env:
           POSTGRES_PASSWORD: postgres
+        ports:
+          # Maps tcp port 5432 on service container to the host
+        - 5432:5432
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
@@ -29,7 +32,7 @@ jobs:
         pip install -r requirements_test.txt
     - name: Run Tests
       env:
-        DATABASE_URL: postgres://postgres:postgres@postgres/postgres
+        DATABASE_URL: postgres://postgres:postgres@localhost/postgres
       run: |
         pip install -e .
         pytest .
