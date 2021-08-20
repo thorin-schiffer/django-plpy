@@ -1,6 +1,7 @@
 -r requirements.txt
 pytest-cov
 pytest-django
+pytest-env
 django-environ
 tox
 tox-pyenv

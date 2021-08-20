@@ -164,7 +164,7 @@ def test_import_project(db):
 
 @mark.django_db(transaction=True)
 @mark.skipif(
-    sys.version_info != (3, 6),
+    sys.version_info >= (3, 7),
     reason="requires python3.6, because this is the default postgres10 version",
 )
 def test_initialize_django_project(db, pl_django):
@@ -201,7 +201,7 @@ def pl_django(db, settings):
 
 
 @mark.skipif(
-    sys.version_info != (3, 6),
+    sys.version_info >= (3, 7),
     reason="requires python3.6, because this is the default postgres10 version",
 )
 def test_trigger_model(pl_django):
