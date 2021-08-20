@@ -31,4 +31,5 @@ jobs:
       env:
         DATABASE_URL: postgres://postgres:postgres@postgres/postgres
       run: |
+        pip install -e .
         pytest .
