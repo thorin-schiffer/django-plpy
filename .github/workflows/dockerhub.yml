@@ -31,11 +31,11 @@ jobs:
       with:
         images: thorinschiffer/postgres-plpython
 
-    - name: Build and push Docker image for Postgres-${{ matrix.python-version }}
+    - name: Build and push Docker image for Postgres-${{ matrix.postgres-version }}
       uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
       with:
         context: .
         push: true
-        tags: ${{ steps.meta.outputs.tags }} + [${{ matrix.python-version }}]
+        tags: ${{ matrix.postgres-version }}
         labels: ${{ steps.meta.outputs.labels }}
-        file: docker/Postgres${{ matrix.python-version }}.Dockerfile
+        file: docker/Postgres${{ matrix.postgres-version }}.Dockerfile
