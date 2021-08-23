@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        postgres-version: [9, 10, 11, 12, 13]
+        postgres-version: [10, 11, 12, 13]
     steps:
     - name: Check out the repo
       uses: actions/checkout@v2
