@@ -36,6 +36,6 @@ jobs:
       with:
         context: .
         push: true
-        tags: ${{ matrix.postgres-version }}
+        tags: thorinschiffer/postgres-plpython:${{ matrix.postgres-version }}
         labels: ${{ steps.meta.outputs.labels }}
         file: docker/Postgres${{ matrix.postgres-version }}.Dockerfile
