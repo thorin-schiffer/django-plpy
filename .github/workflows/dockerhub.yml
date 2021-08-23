@@ -1,4 +1,4 @@
-name: Publish Docker images for Postgres PL/Python
+name: Postgres PL/Python
 
 on:
   release:
