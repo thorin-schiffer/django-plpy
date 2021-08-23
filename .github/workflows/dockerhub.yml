@@ -12,6 +12,9 @@ jobs:
   push_to_registry:
     name: Push Docker image to Docker Hub
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        postgres-version: [9, 10, 11, 12, 13]
     steps:
     - name: Check out the repo
       uses: actions/checkout@v2
@@ -28,11 +31,11 @@ jobs:
       with:
         images: thorinschiffer/postgres-plpython
 
-    - name: Build and push Docker image
+    - name: Build and push Docker image for Postgres-${{ matrix.python-version }}
       uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
       with:
         context: .
         push: true
-        tags: ${{ steps.meta.outputs.tags }}
+        tags: ${{ steps.meta.outputs.tags }} + [${{ matrix.python-version }}]
         labels: ${{ steps.meta.outputs.labels }}
-        file: docker/Postgres10.Dockerfile
+        file: docker/Postgres${{ matrix.python-version }}.Dockerfile
