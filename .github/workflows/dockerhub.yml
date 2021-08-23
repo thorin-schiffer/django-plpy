@@ -1,12 +1,8 @@
 name: Postgres PL/Python
 
-#on:
-#  release:
-#    types: [published]
-
 on:
-  push:
-    branches: [main]
+  release:
+    types: [published]
 
 jobs:
   push_to_registry:
