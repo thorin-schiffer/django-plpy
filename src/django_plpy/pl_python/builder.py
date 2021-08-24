@@ -1,12 +1,12 @@
 import inspect
 import json
-from distutils.sysconfig import get_python_lib
 from functools import wraps
 from textwrap import dedent
 from typing import Dict, List
 
 from django.conf import settings
 from django.db import connection
+from django_plpy.settings import ENV_PATHS
 
 type_mapper = {
     int: "integer",
@@ -173,7 +173,8 @@ def load_env():
     """
     Installs and loads the virtualenv of this project into the postgres interpreter.
     """
-    load_path(get_python_lib())
+    for path in ENV_PATHS:
+        load_path(path)
 
 
 def load_project(path=None):

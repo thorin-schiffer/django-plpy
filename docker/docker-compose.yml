@@ -4,6 +4,7 @@ services:
     image: thorinschiffer/postgres-plpython:10
     volumes:
     - app:/app
+    - python_env:/env
     ports:
     - 8432:5432
     environment:
@@ -17,3 +18,9 @@ volumes:
       type: none
       o: bind
       device: ../src/
+  python_env:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ../venv/lib/python3.6/site-packages
