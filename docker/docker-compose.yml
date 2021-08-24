@@ -1,0 +1,19 @@
+version: '3.9'
+services:
+  postgres:
+    image: thorinschiffer/postgres-plpython:10
+    volumes:
+    - app:/app
+    ports:
+    - 8432:5432
+    environment:
+    - POSTGRES_DB=postgres
+    - POSTGRES_USER=postgres
+    - POSTGRES_PASSWORD=postgres
+volumes:
+  app:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ../src/
