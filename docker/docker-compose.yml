@@ -17,7 +17,7 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: ../src/
+      device: ../tests/
   python_env:
     driver: local
     driver_opts:

@@ -14,6 +14,7 @@ Django utilities for Postgres PL/Python. Work in progress
 ## Usage
 + install simple python function
 + supported arguments types
++ settings PLPY_
 + install command
 + trigger (https://django-pgtrigger.readthedocs.io/en/latest/tutorial.html#keeping-a-field-in-sync-with-another)
 + install function with TD

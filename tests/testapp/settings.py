@@ -122,3 +122,4 @@ STATIC_URL = "/static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 PLPY_ENV_PATHS = env.list("PLPY_ENV_PATHS")
+PLPY_PROJECT_PATH = env.str("PLPY_PROJECT_PATH")

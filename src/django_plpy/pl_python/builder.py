@@ -4,9 +4,8 @@ from functools import wraps
 from textwrap import dedent
 from typing import Dict, List
 
-from django.conf import settings
 from django.db import connection
-from django_plpy.settings import ENV_PATHS
+from django_plpy.settings import ENV_PATHS, PROJECT_PATH
 
 type_mapper = {
     int: "integer",
@@ -179,7 +178,7 @@ def load_env():
 
 def load_project(path=None):
     install_function(pl_load_path)
-    path = path or settings.BASE_DIR
+    path = path or PROJECT_PATH
     load_path(path)
 
 
