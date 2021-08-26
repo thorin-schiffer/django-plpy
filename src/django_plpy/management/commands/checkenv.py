@@ -12,9 +12,9 @@ class Command(BaseCommand):
     @transaction.atomic
     def handle(self, *args, **options):
         info = get_python_info()
-        self.stdout.write(f"Python version: {info['version']}")
+        self.stdout.write(f"Database's Python version: {info['version']}")
 
         if info["version"] != python_version():
             self.stderr.write(
-                f"Postgres python and this python's versions don't match: {python_version()}"
+                f"Postgres python and this python's versions don't match, local version: {python_version()}"
             )
