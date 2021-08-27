@@ -18,6 +18,7 @@ from django_plpy.pl_python.builder import (
     load_django,
     load_path,
 )
+from django_plpy.settings import PROJECT_PATH
 from pytest import fixture, mark
 
 from tests.books.models import Book
@@ -183,11 +184,11 @@ def test_initialize_django_project(db, pl_django):
 
 @fixture
 def pl_django(db, settings):
-    load_path(os.path.join(settings.PLPY_PROJECT_PATH, "src"))
+    load_path(os.path.join(PROJECT_PATH, "src"))
     test_db_params = connection.get_connection_params()
     load_django(
         "tests.testapp.settings",
-        project_path=settings.PLPY_PROJECT_PATH,
+        project_path=PROJECT_PATH,
         extra_env={
             **os.environ,
             "DATABASE_URL": "postgres://{user}:{password}@{host}/{database}".format(
