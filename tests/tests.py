@@ -191,7 +191,8 @@ def pl_django(db, settings):
         extra_env={
             "DATABASE_URL": "postgres://{user}:{password}@{host}/{database}".format(
                 **test_db_params
-            )
+            ),
+            "SECRET_KEY": settings.SECRET_KEY,
         },
     )
 
