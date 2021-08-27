@@ -21,7 +21,7 @@ jobs:
         - 5432:5432
         volumes:
         - ${{github.workspace}}:/app
-        - /opt/hostedtoolcache/Python/3.7.11/x64/lib:/env
+        - /opt/hostedtoolcache/Python/3.7.11/x64/lib/python3.7/site-packages/:/env
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
@@ -40,6 +40,3 @@ jobs:
       run: |
         pip install -e .
         pytest .
-    # Enable tmate debugging of manually-triggered workflows if the input option was provided
-    - name: Setup tmate session
-      uses: mxschmitt/action-tmate@v3
