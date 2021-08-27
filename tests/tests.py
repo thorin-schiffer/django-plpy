@@ -1,13 +1,10 @@
 import os
-import sys
 from typing import List
 
 import django
 from django.db import connection
 from django.db.models import Func, F, Transform
-from pytest import fixture, mark
 from django.db.models import IntegerField
-from tests.books.models import Book
 from django_plpy.pl_python.builder import (
     build_pl_function,
     install_function,
@@ -21,6 +18,9 @@ from django_plpy.pl_python.builder import (
     load_django,
     load_path,
 )
+from pytest import fixture, mark
+
+from tests.books.models import Book
 
 
 @fixture
@@ -151,7 +151,7 @@ def test_import_project(db):
     load_project()
 
     def pl_test_import_project() -> int:
-        from testapp import import_module
+        from tests.testapp import import_module
 
         return import_module.pl_max(10, 20)
 
@@ -163,10 +163,6 @@ def test_import_project(db):
 
 
 @mark.django_db(transaction=True)
-@mark.skipif(
-    sys.version_info >= (3, 7),
-    reason="requires python3.6, because this is the default postgres10 version",
-)
 def test_initialize_django_project(db, pl_django):
     # this is needed because the request within the trigger won't see the changes if the db is not transactional
     Book.objects.all().delete()
@@ -187,11 +183,11 @@ def test_initialize_django_project(db, pl_django):
 
 @fixture
 def pl_django(db, settings):
-    load_path(os.path.join(settings.BASE_DIR.parent, "src"))
+    load_path(os.path.join(settings.PLPY_PROJECT_PATH, "src"))
     test_db_params = connection.get_connection_params()
     load_django(
         "tests.testapp.settings",
-        project_path=settings.BASE_DIR.parent,
+        project_path=settings.PLPY_PROJECT_PATH,
         extra_env={
             "DATABASE_URL": "postgres://{user}:{password}@{host}/{database}".format(
                 **test_db_params
@@ -200,10 +196,6 @@ def pl_django(db, settings):
     )
 
 
-@mark.skipif(
-    sys.version_info >= (3, 7),
-    reason="requires python3.6, because this is the default postgres10 version",
-)
 def test_trigger_model(pl_django):
     def pl_trigger(new: Book, old: Book, td, plpy):
         # don't use save method here, it will kill the database because of recursion

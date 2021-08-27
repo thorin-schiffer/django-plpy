@@ -25,11 +25,7 @@ Django utilities for Postgres PL/Python. Work in progress
 + manage py commands
 + mind the python versions, official postgres10 is based on stretch by default which only has 3.5
 + it's easier to update python version in your env then change the python version in plpython (would need to rebuild from source)
-
-versions
-10 - 3.5.3
-11 - 3.7.3
-
++ in docker images python 3.7.3 was used, because it's a system version for buster
 
 ## Under the hood
 
