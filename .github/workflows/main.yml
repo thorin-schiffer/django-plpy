@@ -20,7 +20,7 @@ jobs:
         ports:
         - 5432:5432
         volumes:
-        - .:/app
+        - ./:/app
         - /usr/lib/python3/dist-packages:/env
     steps:
     - uses: actions/checkout@v2
