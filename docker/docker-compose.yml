@@ -23,4 +23,4 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: ../venv/lib/python3.6/site-packages
+      device: ../venv/lib/python3.7/site-packages
