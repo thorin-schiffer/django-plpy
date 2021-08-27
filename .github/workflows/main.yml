@@ -11,14 +11,17 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.6]
+        python-version: [3.7]
     services:
       postgres:
-        image: thorinschiffer/postgres-plpython:10
+        image: thorinschiffer/postgres-plpython:13
         env:
           POSTGRES_PASSWORD: postgres
         ports:
         - 5432:5432
+        volumes:
+        - .:/app
+        - /usr/lib/python3/dist-packages:/env
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
@@ -32,6 +35,8 @@ jobs:
     - name: Run Tests
       env:
         DATABASE_URL: postgres://postgres:postgres@localhost/postgres
+        PLPY_ENV_PATHS: /env,
+        PLPY_PROJECT_PATH: /app
       run: |
         pip install -e .
         pytest .
