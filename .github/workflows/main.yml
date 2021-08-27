@@ -21,7 +21,7 @@ jobs:
         - 5432:5432
         volumes:
         - ${{github.workspace}}:/app
-        - /opt/hostedtoolcache/Python/3.7.11/x64/lib/python3.7/site-packages/:/env
+        - ${{env.LD_LIBRARY_PATH}}/python${{ matrix.python-version }}/site-packages/:/env
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
