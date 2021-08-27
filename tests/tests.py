@@ -189,10 +189,10 @@ def pl_django(db, settings):
         "tests.testapp.settings",
         project_path=settings.PLPY_PROJECT_PATH,
         extra_env={
+            **os.environ,
             "DATABASE_URL": "postgres://{user}:{password}@{host}/{database}".format(
                 **test_db_params
             ),
-            "SECRET_KEY": settings.SECRET_KEY,
         },
     )
 
