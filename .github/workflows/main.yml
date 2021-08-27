@@ -12,9 +12,10 @@ jobs:
     strategy:
       matrix:
         python-version: [3.7]
+        postgres-version: [10, 11, 12, 13]
     services:
       postgres:
-        image: thorinschiffer/postgres-plpython:13
+        image: thorinschiffer/postgres-plpython:${{ matrix.postgres-version }}
         env:
           POSTGRES_PASSWORD: postgres
         ports:
