@@ -1,7 +1,7 @@
 version: '3.9'
 services:
   postgres:
-    image: thorinschiffer/postgres-plpython:10
+    image: thorinschiffer/postgres-plpython:13
     volumes:
     - app:/app
     - python_env:/env

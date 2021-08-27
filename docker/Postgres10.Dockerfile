@@ -1,7 +1,6 @@
-FROM postgres:10
+FROM postgres:10-buster
 
-RUN apt-get update
-RUN apt-get -y install python3 postgresql-plpython3-10
+RUN apt-get update && apt-get -y install postgresql-plpython3-10
 
 RUN  apt-get clean && \
      rm -rf /var/cache/apt/* /var/lib/apt/lists/*
