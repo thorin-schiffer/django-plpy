@@ -11,13 +11,15 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.7]
+        python-version: [3.6, 3.7]
         postgres-version: [10, 11, 12, 13]
     services:
       postgres:
         image: thorinschiffer/postgres-plpython:${{ matrix.postgres-version }}
         env:
           POSTGRES_PASSWORD: postgres
+          LD_LIBRARY_PATH: ${{github.workspace}}/venv/lib
+          pythonLocation: ${{github.workspace}}/venv
         ports:
         - 5432:5432
         volumes:
