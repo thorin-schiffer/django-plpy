@@ -11,21 +11,21 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.7.11]
+        python-version: [3.7]
         postgres-version: [10, 11, 12, 13]
+        include:
+        - python-version: 3.7
+          python-long-version: 3.7.11
     services:
       postgres:
         image: thorinschiffer/postgres-plpython:${{ matrix.postgres-version }}
         env:
           POSTGRES_PASSWORD: postgres
-          PYTHON_LONG_VERSION: ${{ matrix.python-version }}
-          PYTHON_SHORT_VERSION: |
-            [[ $PYTHON_LONG_VERSION =~ ^[0-9]+\.[0-9]+ ]] && echo "${BASH_REMATCH[0]}"
         ports:
         - 5432:5432
         volumes:
         - ${{github.workspace}}:/app
-        - /opt/hostedtoolcache/Python/${{ matrix.python-version }}/x64/lib/python$PYTHON_SHORT_VERSION/site-packages/:/env
+        - /opt/hostedtoolcache/Python/${{ matrix.python-long-version }}/x64/lib/pytho{{ matrix.python-version }}/site-packages/:/env
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
