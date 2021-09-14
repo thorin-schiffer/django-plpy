@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
-from django_plpy.pl_python.builder import pl_functions, install_function, pl_triggers
+from django_plpy.builder import pl_functions, install_function, pl_triggers
 
 
 class Command(BaseCommand):

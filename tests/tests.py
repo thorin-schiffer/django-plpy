@@ -6,7 +6,7 @@ import django
 from django.db import connection
 from django.db.models import Func, F, Transform
 from django.db.models import IntegerField
-from django_plpy.pl_python.builder import (
+from django_plpy.builder import (
     build_pl_function,
     install_function,
     plfunction,
