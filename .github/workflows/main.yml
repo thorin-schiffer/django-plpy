@@ -25,7 +25,7 @@ jobs:
         - 5432:5432
         volumes:
         - ${{github.workspace}}:/app
-        - /opt/hostedtoolcache/Python/${{ matrix.python-long-version }}/x64/lib/pytho{{ matrix.python-version }}/site-packages/:/env
+        - /opt/hostedtoolcache/Python/${{ matrix.python-long-version }}/x64/lib/python${{ matrix.python-version }}/site-packages/:/env
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
