@@ -11,13 +11,18 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.6, 3.7]
+        python-version: [3.6, 3.7, 3.8, 3.9]
         postgres-version: [10, 11, 12, 13]
         include:
-        - python-version: 3.7
-          python-long-version: 3.7.11
         - python-version: 3.6
           python-long-version: 3.6.14
+        - python-version: 3.7
+          python-long-version: 3.7.11
+        - python-version: 3.8
+          python-long-version: 3.8.11
+        - python-version: 3.9
+          python-long-version: 3.9.6
+
     services:
       postgres:
         image: thorinschiffer/postgres-plpython:${{ matrix.postgres-version }}
