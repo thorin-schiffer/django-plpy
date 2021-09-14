@@ -18,8 +18,6 @@ jobs:
         image: thorinschiffer/postgres-plpython:${{ matrix.postgres-version }}
         env:
           POSTGRES_PASSWORD: postgres
-          LD_LIBRARY_PATH: ${{github.workspace}}/venv/lib
-          pythonLocation: ${{github.workspace}}/venv
         ports:
         - 5432:5432
         volumes:
@@ -40,6 +38,8 @@ jobs:
         DATABASE_URL: postgres://postgres:postgres@localhost/postgres
         PLPY_ENV_PATHS: /env,
         PLPY_PROJECT_PATH: /app
+        LD_LIBRARY_PATH: ${{github.workspace}}/venv/lib
+        pythonLocation: ${{github.workspace}}/venv
       run: |
         pip install -e .
         pytest .
