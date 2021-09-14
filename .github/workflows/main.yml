@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.6, 3.7]
+        python-version: [3.7]
         postgres-version: [10, 11, 12, 13]
     services:
       postgres:
@@ -22,7 +22,7 @@ jobs:
         - 5432:5432
         volumes:
         - ${{github.workspace}}:/app
-        - /opt/hostedtoolcache/Python/3.7.11/x64/lib/python3.7/site-packages/:/env
+        - /opt/hostedtoolcache/Python/3.7/x64/lib/python3.7/site-packages/:/env
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
@@ -38,8 +38,6 @@ jobs:
         DATABASE_URL: postgres://postgres:postgres@localhost/postgres
         PLPY_ENV_PATHS: /env,
         PLPY_PROJECT_PATH: /app
-        LD_LIBRARY_PATH: ${{github.workspace}}/venv/lib
-        pythonLocation: ${{github.workspace}}/venv
       run: |
         pip install -e .
         pytest .
