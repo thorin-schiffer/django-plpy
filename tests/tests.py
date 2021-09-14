@@ -1,4 +1,5 @@
 import os
+from platform import python_version
 from typing import List
 
 import django
@@ -17,9 +18,10 @@ from django_plpy.pl_python.builder import (
     load_project,
     load_django,
     load_path,
+    get_python_info,
 )
 from django_plpy.settings import PROJECT_PATH
-from pytest import fixture, mark
+from pytest import fixture, mark, skip
 
 from tests.books.models import Book
 
@@ -164,7 +166,7 @@ def test_import_project(db):
 
 
 @mark.django_db(transaction=True)
-def test_initialize_django_project(db, pl_django):
+def test_initialize_django_project(same_python_versions, pl_django):
     # this is needed because the request within the trigger won't see the changes if the db is not transactional
     Book.objects.all().delete()
     Book.objects.create(name="test")
@@ -198,7 +200,14 @@ def pl_django(db, settings):
     )
 
 
-def test_trigger_model(pl_django):
+@fixture
+def same_python_versions(db):
+    info = get_python_info()
+    if info["version"] != python_version():
+        skip("This test can only succeed if db and host python versions match")
+
+
+def test_trigger_model(same_python_versions, pl_django):
     def pl_trigger(new: Book, old: Book, td, plpy):
         # don't use save method here, it will kill the database because of recursion
         new.name = new.name + "test"
