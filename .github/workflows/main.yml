@@ -13,7 +13,7 @@ jobs:
       matrix:
         python-version: [3.6, 3.7, 3.8, 3.9]
         postgres-version: [10, 11, 12, 13]
-        django-version: [Django==2.2, Django>=3.2, <4.0]
+        django-version: [Django==2.2, 'Django>=3.2,<4.0']
         include:
         - python-version: 3.6
           python-long-version: 3.6.14
