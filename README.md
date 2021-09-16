@@ -47,6 +47,8 @@ HINT:  Use CREATE LANGUAGE to load the language into the database.
 
 you haven't migrated
 - python versions is a mess in debian, use pyenv in docker images for plpython?
+- environment / interpreter context persistence and database restart
+- start database functions with plpy_ prefix to be sure they are not executed locally
 
 ## Installation for development
 

@@ -36,3 +36,4 @@ repos:
     files: ^src/
     args:
     - --ignore=D104, D100, D2, D4
+    - --count

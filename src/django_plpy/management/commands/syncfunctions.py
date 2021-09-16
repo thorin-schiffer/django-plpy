@@ -5,10 +5,19 @@ from django_plpy.builder import pl_functions, install_function, pl_triggers
 
 
 class Command(BaseCommand):
+    """
+    Command class for installing or overwriting the plpy functions to the database
+    """
+
     help = "Syncs PL/Python functions, decorated with @plfunction and @pltrigger"
 
     @transaction.atomic
     def handle(self, *args, **options):
+        """
+        Handles the task execution
+        @param args: args of the command
+        @param options: options of the command
+        """
         if not pl_functions and not pl_triggers:
             self.stdout.write("No PL/Python functions found")
 

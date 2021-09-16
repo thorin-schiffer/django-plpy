@@ -20,6 +20,13 @@ type_mapper = {
 
 
 def remove_decorator(source_code, name):
+    """
+    Removes decorator with the name from the source code
+
+    @param source_code: code of the function as returned by inspect module
+    @param name: name of the decorator to remove
+    @return: source code of the function without the decorator statement
+    """
     start = source_code.find(f"@{name}")
     end = source_code.find("def")
     if start < 0:
@@ -27,7 +34,14 @@ def remove_decorator(source_code, name):
     return source_code[:start] + source_code[end:]
 
 
-def build_pl_function(f):
+def build_pl_function(f) -> str:
+    """
+    Builds the source code of the plpy stored procedure from the local python code.
+    The function code gets copied and installed to the database.
+    Use syncfunctions manage.py command to install the functions to the database
+    @param f: function / callable the code of will be rendered to the plpy stored procedure
+    @return: the code of the stored procedure
+    """
     name = f.__name__
     signature = inspect.signature(f)
     try:
@@ -63,7 +77,19 @@ $$ LANGUAGE plpython3u
 """
 
 
-def build_pl_trigger_function(f, event, when, table=None, model=None):
+def build_pl_trigger_function(f, event, when, table=None, model=None) -> str:
+    """
+    Builds source code of the trigger function from the python function f.
+    The source code will be copied to the trigger function and installed in the database.
+    Use syncfunctions manage.py command to install the function within the database.
+    Read more about plpy trigger functions here https://www.postgresql.org/docs/13/plpython-trigger.html
+    @param f: function/callable
+    @param event: contains the event as a string: INSERT, UPDATE, DELETE, or TRUNCATE
+    @param when: contains one of BEFORE, AFTER, or INSTEAD OF
+    @param table: table name the trigger will be installed on, incompatible with model argument
+    @param model: django model name the trigger is to be associated with, incompatible with tabel argument
+    @return: source code of the trigger function
+    """
     if not table and not model:
         raise RuntimeError("Either model or table must be set for trigger installation")
 
@@ -115,6 +141,16 @@ END;
 
 
 def install_function(f, trigger_params=None):
+    """
+    Installs function f as a trigger or stored procedure to the database. Must have a proper signature:
+    - td, plpy for trigger without django ORM
+    - new: Model, old: Model, td, plpy for trigger with django ORM
+    Stored procedure arguments must be type annotated for proper type mapping to PL/SQL built in types.
+    Read more about td https://www.postgresql.org/docs/13/plpython-trigger.html
+    and plpy https://www.postgresql.org/docs/13/plpython-database.html objects
+    @param f: function/callable to install as
+    @param trigger_params: dict with params as accepted by build_pl_trigger_function
+    """
     trigger_params = trigger_params or {}
     pl_python_function = (
         build_pl_trigger_function(f, **trigger_params)
@@ -130,6 +166,12 @@ pl_triggers = {}
 
 
 def plfunction(f):
+    """
+    Decorator marking a function for installation with manage.py syncfunctions as a stored procedure
+    @param f: function to be installed
+    @return: wrapped registered function
+    """
+
     @wraps(f)
     def installed_func(*args, **kwargs):
         return f(*args, **kwargs)
@@ -140,6 +182,12 @@ def plfunction(f):
 
 
 def pltrigger(**trigger_parameters):
+    """
+    Decorator marking a function for installation with manage.py syncfunctions as a trigger function
+    @param f: function to be installed
+    @return: wrapped registered function
+    """
+
     def _pl_trigger(f):
         @wraps(f)
         def installed_func(*args, **kwargs):
@@ -157,12 +205,20 @@ def pltrigger(**trigger_parameters):
 
 @plfunction
 def pl_load_path(path: str):
+    """
+    Loads function path on the file system to database interpreter
+    @param path: path on the database's filesystem
+    """
     import sys
 
     sys.path.append(path)
 
 
 def load_path(path):
+    """
+    Loads local path to the database's interpreter. Will only work if the database and application are on the same host.
+    @param path: local system filepath to load
+    """
     install_function(pl_load_path)
     with connection.cursor() as cursor:
         cursor.execute(f"select pl_load_path('{path}')")
@@ -177,6 +233,10 @@ def load_env():
 
 
 def load_project(path=None):
+    """
+    Load application to the database interpreter by path from PLPY_PROJECT_PATH setting. Defaults to BASE_DIR.parent.
+    @param path: path of the project, defaults to PLPY_PROJECT_PATH
+    """
     install_function(pl_load_path)
     path = path or PROJECT_PATH
     load_path(path)
@@ -186,6 +246,12 @@ def load_project(path=None):
 def pl_load_django(
     project_dir: str, django_settings_module: str, extra_env: Dict[str, str]
 ):
+    """
+    Stored procedure to configure django application in the context of the database interpreter.
+    @param project_dir: project path
+    @param django_settings_module: name of the django settings module to use
+    @param extra_env: extra environment to pass to the database interpreter, like secrets
+    """
     import os
     import sys
 
@@ -198,6 +264,12 @@ def pl_load_django(
 
 
 def load_django(setting_module, project_path=None, extra_env=None):
+    """
+    Loads django to the database interpreter.
+    @param project_dir: project path
+    @param django_settings_module: name of the django settings module to use
+    @param extra_env: extra environment to pass to the database interpreter, like secrets
+    """
     load_env()
     load_project(project_path)
     install_function(pl_load_django)
@@ -212,12 +284,20 @@ def load_django(setting_module, project_path=None, extra_env=None):
 
 @plfunction
 def pl_python_version() -> str:
+    """
+    Stored procedure that returns databases python interpreter version
+    @return: semantic python version X.X.X
+    """
     from platform import python_version
 
     return python_version()
 
 
 def get_python_info():
+    """
+    Return database python info as a dict
+    @return: dict with python information
+    """
     install_function(pl_python_version)
     with connection.cursor() as cursor:
         cursor.execute("select pl_python_version()")
