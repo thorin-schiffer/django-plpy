@@ -1,4 +1,4 @@
-name: django-plpy
+name: test
 on:
   push:
     branches: [main]
@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    name: Test P${{ matrix.python-version }}, Dj${{ matrix.django-version }}, PSQL${{matrix.postgres-version}}
+    name: Test P${{ matrix.python-version }}, ${{ matrix.django-version }}, PSQL${{matrix.postgres-version}}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
