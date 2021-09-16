@@ -28,7 +28,6 @@ repos:
   rev: 21.7b0
   hooks:
   - id: black
-    language_version: python3.6
 - repo: https://github.com/PyCQA/pydocstyle
   rev: 6.1.1
   hooks:
