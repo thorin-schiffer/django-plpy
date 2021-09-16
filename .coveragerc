@@ -27,6 +27,5 @@ exclude_lines =
     if 0:
     if __name__ == .__main__.:
 skip_covered = True
-fail_under=93
 sort = Miss
 ignore_errors = True
