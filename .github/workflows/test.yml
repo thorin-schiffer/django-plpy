@@ -7,15 +7,19 @@ on:
 
 jobs:
   build:
-    name: Test P${{ matrix.python-version }}, ${{ matrix.django-version }}, PSQL${{matrix.postgres-version}}
+    name: Test P${{ matrix.python-version }}, Dj${{ matrix.django-version-number }}, PSQL${{matrix.postgres-version}}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         python-version: [3.6, 3.7, 3.8, 3.9]
         postgres-version: [10, 11, 12, 13]
-        django-version: [Django==2.2, 'Django>=3.2,<4.0']
-
+        django-version-number: [2, 3]
+        include:
+        - django-version-number: 2
+          django-version: Django==2.2
+        - django-version-number: 3
+          django-version: Django>=3.2,<4.0
     services:
       postgres:
         image: thorinschiffer/postgres-plpython:${{ matrix.postgres-version }}
@@ -38,6 +42,11 @@ jobs:
         pip install -U "${{matrix.django-version}}"
         ls /opt/hostedtoolcache/Python/
         cp -R /opt/hostedtoolcache/Python/${{ matrix.python-version }}*/x64/lib/python${{ matrix.python-version }}/site-packages/ ${{github.workspace}}/venv/
+    - name: Download code climate client
+      run: |
+        curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+        chmod +x ./cc-test-reporter
+        GIT_BRANCH=$GITHUB_REF GIT_COMMIT_SHA=$GITHUB_SHA ./cc-test-reporter before-build
 
     - name: Run Tests
       env:
@@ -46,4 +55,9 @@ jobs:
         PLPY_PROJECT_PATH: /app
       run: |
         pip install -e .
-        pytest .
+        pytest --junitxml=test-results/junit.xml --cov-report=xml --cov=. .
+    - name: Report coverage
+      run: GIT_BRANCH=$GITHUB_REF GIT_COMMIT_SHA=$GITHUB_SHA ./cc-test-reporter after-build --exit-code $?
+      if: matrix.python-version == 3.7 && matrix.postgres-version == 13 && matrix.django-version-number == 3
+      env:
+        CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
