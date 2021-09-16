@@ -7,9 +7,10 @@ on:
 
 jobs:
   build:
-    name: Test Python ${{ matrix.python-version }}, Django ${{ matrix.django-version }}, Postgres ${{matrix.postgres-version}}
+    name: Test P${{ matrix.python-version }}, Dj${{ matrix.django-version }}, PSQL${{matrix.postgres-version}}
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         python-version: [3.6, 3.7, 3.8, 3.9]
         postgres-version: [10, 11, 12, 13]
