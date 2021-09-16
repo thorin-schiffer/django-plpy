@@ -306,3 +306,14 @@ def get_python_info():
         cursor.execute("select pl_python_version()")
         info = {"version": cursor.fetchone()[0]}
     return info
+
+
+def sync_functions():
+    """
+    Installs functions decorated with @pl_function and @pl_trigger to the database
+    """
+    for function_name, f in pl_functions.items():
+        install_function(f)
+
+    for function_name, f in pl_triggers.items():
+        install_function(f[0], f[1])
