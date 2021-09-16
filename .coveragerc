@@ -2,7 +2,7 @@
 [run]
 branch = True
 source = django_plpy
-# omit = bad_file.py
+omit = */tests/*, */migrations/*, */urls.py, */settings.py, */asgi.py, manage.py, setup.py
 
 [paths]
 source =
@@ -26,3 +26,7 @@ exclude_lines =
     # Don't complain if non-runnable code isn't run:
     if 0:
     if __name__ == .__main__.:
+skip_covered = True
+fail_under=93
+sort = Miss
+ignore_errors = True

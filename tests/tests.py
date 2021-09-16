@@ -3,6 +3,7 @@ from platform import python_version
 from typing import List
 
 import django
+from django.core.management import call_command
 from django.db import connection
 from django.db.models import Func, F, Transform
 from django.db.models import IntegerField
@@ -45,11 +46,12 @@ $$ LANGUAGE plpython3u;
 
 
 @fixture(autouse=True)
-def clean_triggers(db):
+def clean_triggers_and_functions(db):
     with connection.cursor() as cursor:
         cursor.execute(
             "DROP TRIGGER IF EXISTS pl_trigger_trigger ON books_book CASCADE;"
         )
+        cursor.execute("DROP FUNCTION IF EXISTS pl_max;")
 
 
 def test_simple_function(pl_simple_function, db):
@@ -251,3 +253,23 @@ def test_function_different_arguments(db):
     install_function(pl_test_arguments)
     with connection.cursor() as cursor:
         cursor.callproc("pl_test_arguments", [["a", "b"], [1, 2], True, 1.5])
+
+
+@mark.django_db(transaction=True)
+def test_sync_functions():
+    @plfunction
+    def pl_max(a: int, b: int) -> int:
+        if a > b:
+            return a
+        return b
+
+    call_command("syncfunctions")
+    with connection.cursor() as cursor:
+        cursor.execute("select pl_max(10, 20)")
+        row = cursor.fetchone()
+    assert row[0] == 20
+
+
+@mark.django_db(transaction=True)
+def test_check_env():
+    call_command("checkenv")

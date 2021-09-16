@@ -310,7 +310,7 @@ def get_python_info():
 
 def sync_functions():
     """
-    Installs functions decorated with @pl_function and @pl_trigger to the database
+    Installs functions decorated with @plfunction and @pltrigger to the database
     """
     for function_name, f in pl_functions.items():
         install_function(f)
