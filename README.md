@@ -2,6 +2,11 @@
 
 Django utilities for Postgres PL/Python. Work in progress
 
+[![Maintainability](https://api.codeclimate.com/v1/badges/8fe31e70125f34ad5328/maintainability)](https://codeclimate.com/github/eviltnan/django-plpy/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/8fe31e70125f34ad5328/test_coverage)](https://codeclimate.com/github/eviltnan/django-plpy/test_coverage)
+[![test](https://github.com/eviltnan/django-plpy/actions/workflows/test.yml/badge.svg)](https://github.com/eviltnan/django-plpy/actions/workflows/test.yml)
+[![lint](https://github.com/eviltnan/django-plpy/actions/workflows/lint.yml/badge.svg)](https://github.com/eviltnan/django-plpy/actions/workflows/lint.yml)
+
 ## Description
 
 
