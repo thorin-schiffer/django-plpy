@@ -135,7 +135,6 @@ def test_pltrigger_decorator_registers():
     assert params == {"event": "INSERT", "when": "BEFORE", "table": "books_book"}
 
 
-@mark.django_db(transaction=True)
 def test_use_env(db):
     load_env()
 

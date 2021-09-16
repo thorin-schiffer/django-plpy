@@ -2,6 +2,7 @@
 pytest-cov
 pytest-django
 pytest-env
+pytest-randomly
 django-environ
 tox
 tox-pyenv
