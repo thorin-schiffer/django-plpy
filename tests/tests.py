@@ -44,6 +44,14 @@ $$ LANGUAGE plpython3u;
 """
 
 
+@fixture(autouse=True)
+def clean_triggers(db):
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "DROP TRIGGER IF EXISTS pl_trigger_trigger ON books_book CASCADE;"
+        )
+
+
 def test_simple_function(pl_simple_function, db):
     with connection.cursor() as cursor:
         cursor.execute(pl_simple_function)
@@ -105,15 +113,14 @@ def test_plfunction_decorator_registers():
     assert pl_max in pl_functions.values()
 
 
-def pl_trigger(td, plpy):
-    # mind triggers don't return anything
-    td["new"]["name"] = td["new"]["name"] + "test"
-    td["new"]["amount_sold"] = plpy.execute("SELECT count(*) FROM books_book")[0][
-        "count"
-    ]
-
-
 def test_generate_trigger_function(db):
+    def pl_trigger(td, plpy):
+        # mind triggers don't return anything
+        td["new"]["name"] = td["new"]["name"] + "test"
+        td["new"]["amount_sold"] = plpy.execute("SELECT count(*) FROM books_book")[0][
+            "count"
+        ]
+
     pl_python_trigger_function = build_pl_trigger_function(
         pl_trigger, event="INSERT", when="BEFORE", table="books_book"
     )
@@ -123,6 +130,11 @@ def test_generate_trigger_function(db):
     book.refresh_from_db()
     assert book.name == "booktest"
     assert book.amount_sold == 0
+
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "DROP TRIGGER IF EXISTS pl_trigger_trigger ON books_book CASCADE;"
+        )
 
 
 def test_pltrigger_decorator_registers():
@@ -211,6 +223,7 @@ def same_python_versions(db):
         skip("This test can only succeed if db and host python versions match")
 
 
+@mark.django_db(transaction=True)
 def test_trigger_model(same_python_versions, pl_django):
     def pl_trigger(new: Book, old: Book, td, plpy):
         # don't use save method here, it will kill the database because of recursion
