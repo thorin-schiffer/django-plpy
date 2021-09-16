@@ -44,22 +44,20 @@ def build_pl_function(f) -> str:
     """
     name = f.__name__
     signature = inspect.signature(f)
-    try:
-        pl_args = []
-        python_args = []
-        for arg, specs in signature.parameters.items():
-            if specs.annotation not in type_mapper:
-                raise RuntimeError(f"Unknown type {specs.annotation}")
-            pl_args.append(f"{arg} {type_mapper[specs.annotation]}")
-            if specs.annotation == Dict[str, str]:
-                python_args.append(f"json.loads({arg})")
-            else:
-                python_args.append(arg)
-    except KeyError as ex:
-        raise RuntimeError(
-            f"{ex}:"
-            f"Function {f} must be fully annotated to be translated to pl/python"
-        )
+    pl_args = []
+    python_args = []
+    for arg, specs in signature.parameters.items():
+        if specs.annotation is inspect._empty:
+            raise RuntimeError(
+                f"Function {f} must be fully annotated to be translated to pl/python"
+            )
+        if specs.annotation not in type_mapper:
+            raise RuntimeError(f"Unknown type {specs.annotation}")
+        pl_args.append(f"{arg} {type_mapper[specs.annotation]}")
+        if specs.annotation == Dict[str, str]:
+            python_args.append(f"json.loads({arg})")
+        else:
+            python_args.append(arg)
 
     header = (
         f"CREATE OR REPLACE FUNCTION {name} ({','.join(pl_args)}) "
@@ -207,7 +205,7 @@ def pltrigger(**trigger_parameters):
 
 
 @plfunction
-def pl_load_path(path: str):
+def pl_load_path(path: str):  # pragma: no cover
     """
     Loads function path on the file system to database interpreter
     @param path: path on the database's filesystem
@@ -245,10 +243,11 @@ def load_project(path=None):
     load_path(path)
 
 
+# this code is only run in the database interpreter, that's why coverage doesn't see it
 @plfunction
 def pl_load_django(
     project_dir: str, django_settings_module: str, extra_env: Dict[str, str]
-):
+):  # pragma: no cover
     """
     Stored procedure to configure django application in the context of the database interpreter.
     @param project_dir: project path
@@ -286,7 +285,7 @@ def load_django(setting_module, project_path=None, extra_env=None):
 
 
 @plfunction
-def pl_python_version() -> str:
+def pl_python_version() -> str:  # pragma: no cover
     """
     Stored procedure that returns databases python interpreter version
     @return: semantic python version X.X.X

@@ -22,7 +22,7 @@ from django_plpy.builder import (
     get_python_info,
 )
 from django_plpy.settings import PROJECT_PATH
-from pytest import fixture, mark, skip
+from pytest import fixture, mark, skip, raises
 
 from tests.books.models import Book
 
@@ -253,6 +253,22 @@ def test_function_different_arguments(db):
     install_function(pl_test_arguments)
     with connection.cursor() as cursor:
         cursor.callproc("pl_test_arguments", [["a", "b"], [1, 2], True, 1.5])
+
+
+def test_function_unknown_type(db):
+    def pl_test_arguments(arg: Book) -> int:
+        return 1
+
+    with raises(RuntimeError):
+        install_function(pl_test_arguments)
+
+
+def test_function_not_annotated(db):
+    def pl_test_arguments(arg):
+        return 1
+
+    with raises(RuntimeError):
+        install_function(pl_test_arguments)
 
 
 @mark.django_db(transaction=True)
