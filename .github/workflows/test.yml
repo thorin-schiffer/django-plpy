@@ -15,15 +15,6 @@ jobs:
         python-version: [3.6, 3.7, 3.8, 3.9]
         postgres-version: [10, 11, 12, 13]
         django-version: [Django==2.2, 'Django>=3.2,<4.0']
-        include:
-        - python-version: 3.6
-          python-long-version: 3.6.14
-        - python-version: 3.7
-          python-long-version: 3.7.11
-        - python-version: 3.8
-          python-long-version: 3.8.11
-        - python-version: 3.9
-          python-long-version: 3.9.6
 
     services:
       postgres:
@@ -34,7 +25,6 @@ jobs:
         - 5432:5432
         volumes:
         - ${{github.workspace}}:/app
-        - /opt/hostedtoolcache/Python/${{ matrix.python-long-version }}/x64/lib/python${{ matrix.python-version }}/site-packages/:/env
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
@@ -46,10 +36,13 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements_test.txt
         pip install -U "${{matrix.django-version}}"
+        ls /opt/hostedtoolcache/Python/
+        cp -R /opt/hostedtoolcache/Python/${{ matrix.python-version }}*/x64/lib/python${{ matrix.python-version }}/site-packages/ ${{github.workspace}}/venv/
+
     - name: Run Tests
       env:
         DATABASE_URL: postgres://postgres:postgres@localhost/postgres
-        PLPY_ENV_PATHS: /env,
+        PLPY_ENV_PATHS: /app/venv,
         PLPY_PROJECT_PATH: /app
       run: |
         pip install -e .
