@@ -140,7 +140,7 @@ END;
 """
 
 
-def install_function(f, trigger_params=None):
+def install_function(f, trigger_params=None, cursor=None):
     """
     Installs function f as a trigger or stored procedure to the database. Must have a proper signature:
     - td, plpy for trigger without django ORM
@@ -157,7 +157,10 @@ def install_function(f, trigger_params=None):
         if trigger_params
         else build_pl_function(f)
     )
-    with connection.cursor() as cursor:
+    if not cursor:
+        with connection.cursor() as cursor:
+            cursor.execute(pl_python_function)
+    else:
         cursor.execute(pl_python_function)
 
 

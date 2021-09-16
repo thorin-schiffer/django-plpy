@@ -144,8 +144,8 @@ def test_use_env(db):
 
         return django.VERSION
 
-    install_function(pl_test_use_env)
     with connection.cursor() as cursor:
+        install_function(pl_test_use_env, cursor=cursor)
         cursor.execute("select pl_test_use_env()")
         row = cursor.fetchone()
     assert row[0] == str(django.VERSION)
@@ -201,10 +201,14 @@ def pl_django(db, settings):
     )
 
 
+def sem_to_minor(version):
+    return ".".join(version.split(".")[:2])
+
+
 @fixture
 def same_python_versions(db):
     info = get_python_info()
-    if info["version"] != python_version():
+    if sem_to_minor(info["version"]) != sem_to_minor(python_version()):
         skip("This test can only succeed if db and host python versions match")
 
 
