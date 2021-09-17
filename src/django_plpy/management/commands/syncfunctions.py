@@ -1,11 +1,11 @@
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
-from django_plpy.builder import (
+from django_plpy.installer import (
     pl_functions,
     pl_triggers,
-    sync_functions,
 )
+from django_plpy.installer import sync_functions
 
 
 class Command(BaseCommand):

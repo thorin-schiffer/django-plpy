@@ -77,7 +77,8 @@ proper arguments mapping to the corresponding postgres type function signature. 
 Imagine a function like this:
 
 ```python
-from django_plpy.builder import plfunction
+
+from django_plpy.installer import plfunction
 
 
 @plfunction
@@ -113,7 +114,8 @@ from your project is directly associated with the data changing events in the da
 Here is an example of a python trigger using the `@pltrigger` decorator.
 
 ```python
-from django_plpy.builder import pltrigger
+
+from django_plpy.installer import pltrigger
 
 
 @pltrigger(event="INSERT", when="BEFORE", table="books_book")
@@ -121,7 +123,7 @@ def pl_trigger(td, plpy):
     # mind triggers don't return anything
     td["new"]["name"] = td["new"]["name"] + "test"
     td["new"]["amount_sold"] = plpy.execute("SELECT count(*) FROM books_book")[0][
-        "count"
+      "count"
     ]
 ```
 
@@ -129,7 +131,8 @@ The parameters of `@pltrigger` decorator declare the trigger parameters like eve
 name. You can replace `table_name` with a model name, the table name will looked up automatically:
 
 ```python
-from django_plpy.builder import pltrigger
+
+from django_plpy.installer import pltrigger
 from django.db.models import Model, CharField, IntegerField
 
 
@@ -144,7 +147,7 @@ def pl_trigger(td, plpy):
     # mind triggers don't return anything
     td["new"]["name"] = td["new"]["name"] + "test"
     td["new"]["amount_sold"] = plpy.execute("SELECT count(*) FROM books_book")[0][
-        "count"
+      "count"
     ]
 ```
 

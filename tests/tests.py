@@ -9,19 +9,21 @@ from django.db.models import Func, F, Transform
 from django.db.models import IntegerField
 from django_plpy.builder import (
     build_pl_function,
+    build_pl_trigger_function,
+)
+from django_plpy.installer import (
     install_function,
     plfunction,
-    pl_functions,
-    build_pl_trigger_function,
     pltrigger,
-    pl_triggers,
+    load_path,
     load_env,
     load_project,
     load_django,
-    load_path,
     get_python_info,
-    sem_to_minor,
+    pl_triggers,
+    pl_functions,
 )
+from django_plpy.utils import sem_to_minor
 from django_plpy.settings import PROJECT_PATH
 from pytest import fixture, mark, skip, raises
 

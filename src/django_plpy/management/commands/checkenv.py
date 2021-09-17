@@ -3,7 +3,8 @@ from platform import python_version
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
-from django_plpy.builder import get_python_info, sem_to_minor
+from django_plpy.utils import sem_to_minor
+from django_plpy.installer import get_python_info
 
 
 class Command(BaseCommand):
