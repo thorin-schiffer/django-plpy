@@ -106,6 +106,40 @@ with connection.cursor() as cursor:
 assert row[0] == 20
 ```
 
+Or even use as a custom function in the django ORM:
+
+```python
+from django.db.models import F, Func
+from tests.books.models import Book
+
+Book.objects.annotate(
+    max_value=Func(F("amount_sold"), F("amount_stock"), function="pl_max")
+)
+```
+
+or even declared as a custom ORM lookup:
+
+```python
+from django_plpy.installer import plfunction
+from django.db.models import Transform
+from django.db.models import IntegerField
+from tests.books.models import Book
+
+
+@plfunction
+def plsquare(a: int) -> int:
+    return a * a
+
+
+class PySquare(Transform):
+    lookup_name = "plsquare"
+    function = "plsquare"
+
+
+IntegerField.register_lookup(PySquare)
+assert Book.objects.filter(amount_stock__plsquare=400).exists()
+```
+
 ### Installing of python triggers
 
 Triggers are a very mighty mechanism, django-plpy allows you to easily mark python function as a trigger, so some logic
@@ -123,7 +157,7 @@ def pl_trigger(td, plpy):
     # mind triggers don't return anything
     td["new"]["name"] = td["new"]["name"] + "test"
     td["new"]["amount_sold"] = plpy.execute("SELECT count(*) FROM books_book")[0][
-      "count"
+        "count"
     ]
 ```
 
