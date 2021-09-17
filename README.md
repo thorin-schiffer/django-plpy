@@ -181,7 +181,7 @@ def pl_trigger(td, plpy):
     # mind triggers don't return anything
     td["new"]["name"] = td["new"]["name"] + "test"
     td["new"]["amount_sold"] = plpy.execute("SELECT count(*) FROM books_book")[0][
-      "count"
+        "count"
     ]
 ```
 
@@ -213,6 +213,60 @@ cannot be used in triggers. This is what you will see in this case:
 Database's Python version: 3.6.9
 Postgres python and this python's versions don't match, local version: 3.7.12.Django-plpy Django ORM cannot be used in triggers.
 ```
+
+### Using Django in PL functions and triggers
+
+While installing with `syncfunctions` the source code of the function will be copied to a corresponding stored procedure
+and installed in postgres. This makes your local context not available to the functions, which means that no models or
+libraries can be used within the tranferred functions.
+
+In order to solve this problem, you need to set up your python project and environment within a postgres python
+interpreter. Django-plpy supports following two scenarios of how you use your database.
+
+#### Database and application are on the same host
+
+Rarely used nowadays, but still out there, this scenario is the simplest for the environment sharing. Django-plpy
+creates stored procedures and transfers the necessary configuration to the database:
+
+- secrets and database access creds
+- path to the python env (defaults to `distutils.sysconfig.get_python_lib()`, for more config see below)
+- loads django applications the way manage.py does it
+
+#### Database is in a separate docker container
+
+More common production scenario is that the database is on a separate docker container.
+
+##### Couple of words about docker and plpython or django-plpy
+
+Official Postgres image doesn't support plpython plugin out of the box, so if you want to use plpython as such you would
+need to create your own image or use one of those provided by the maintainer of this package (
+thorinschiffer/postgres-plpython:<your postgres version>).
+
+All of the images provide python 3.7, because postgres uses the default python environment from the OS the image is
+based on and 3.7 is the standard for Debian Buster.
+
+##### Using django-plpy with dockerized Postgres
+
+To make the code available to the Postgres python interpreter, it has to somehow appear within the docker container. You
+can either provision the image with it while building if you decided to write your own docker image / dockerfile or you
+can share the code using volumes.
+
+Once the code and environment exist somewhere within the Docker container, django-plpy can be told to use them:
+So if your environment lives under `/env` (copy site-packages folder to this path) and your app within `/app`, add
+following settings to your `settings.py`
+
+```python
+PLPY_ENV_PATHS = ["/env"]
+PLPY_PROJECT_PATH = "/app"
+```
+
+##### Loading env
+
+TODO: need command
+
+##### Loading django project and using ORM in functions and triggers
+
+##### Loading your project and using it in functions and triggers
 
 + settings PLPY_
 + install command
@@ -255,6 +309,8 @@ you haven't migrated
 - python versions is a mess in debian, use pyenv in docker images for plpython?
 - environment / interpreter context persistence and database restart
 - start database functions with plpy_ prefix to be sure they are not executed locally
+
+## contribution
 
 ## Installation for development
 
