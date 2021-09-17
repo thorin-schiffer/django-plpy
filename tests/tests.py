@@ -20,6 +20,7 @@ from django_plpy.builder import (
     load_django,
     load_path,
     get_python_info,
+    sem_to_minor,
 )
 from django_plpy.settings import PROJECT_PATH
 from pytest import fixture, mark, skip, raises
@@ -212,10 +213,6 @@ def pl_django(db, settings):
             ),
         },
     )
-
-
-def sem_to_minor(version):
-    return ".".join(version.split(".")[:2])
 
 
 @fixture

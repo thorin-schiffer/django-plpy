@@ -316,3 +316,12 @@ def sync_functions():
 
     for function_name, f in pl_triggers.items():
         install_function(f[0], f[1])
+
+
+def sem_to_minor(version):
+    """
+    Returns a minor release part of the semantic version
+    @param version: semantic version in format x.x.x
+    @return: minor release in format x.x
+    """
+    return ".".join(version.split(".")[:2])
