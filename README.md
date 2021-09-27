@@ -261,6 +261,8 @@ PLPY_PROJECT_PATH = "/app"
 ```
 
 ##### Loading env
+@plfunction or @pltrigger need a param if env needs to be used
++ function can be made callable with function.db_call(*args, **kwargs)
 
 TODO: need command
 
