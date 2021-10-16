@@ -1,4 +1,4 @@
-Django utilities for Postgres PL/Python.
+Django utilities for Postgres PL/Python. WIP
 
 [![Maintainability](https://api.codeclimate.com/v1/badges/8fe31e70125f34ad5328/maintainability)](https://codeclimate.com/github/eviltnan/django-plpy/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/8fe31e70125f34ad5328/test_coverage)](https://codeclimate.com/github/eviltnan/django-plpy/test_coverage)
@@ -117,7 +117,7 @@ Book.objects.annotate(
 )
 ```
 
-or even declared as a custom ORM lookup:
+or even declare it as a custom ORM lookup:
 
 ```python
 from django_plpy.installer import plfunction
@@ -261,6 +261,8 @@ PLPY_PROJECT_PATH = "/app"
 ```
 
 ##### Loading env
+@plfunction or @pltrigger need a param if env needs to be used
++ function can be made callable with function.db_call(*args, **kwargs)
 
 TODO: need command
 
@@ -296,6 +298,7 @@ TODO: need command
 - including ORM will only work when django project is on the same host, which is rare. the only real way is to install
   the whole code on the db host
 - there is certain danger of getting them out of hand
+- enabling orm stores the os.environ in json in plaintext?
 - provision custom postgres container with plpythonu and your code so ORM is accessible
 - if you see this:
 

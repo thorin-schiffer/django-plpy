@@ -51,7 +51,7 @@ jobs:
     - name: Run Tests
       env:
         DATABASE_URL: postgres://postgres:postgres@localhost/postgres
-        PLPY_ENV_PATHS: /app/venv,
+        PLPY_ENV_PATHS: /app/venv,/app/src/
         PLPY_PROJECT_PATH: /app
       run: |
         pip install -e .

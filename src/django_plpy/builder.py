@@ -1,8 +1,10 @@
 import inspect
 from textwrap import dedent
 from typing import Dict, List
-
+import json
+from django_plpy.settings import ENV_PATHS, PROJECT_PATH
 from django_plpy.utils import remove_decorator
+from django.conf import settings
 
 type_mapper = {
     int: "integer",
@@ -16,7 +18,7 @@ type_mapper = {
 }
 
 
-def build_pl_function(f) -> str:
+def build_pl_function(f, global_=False) -> str:
     """
     Builds the source code of the plpy stored procedure from the local python code.
     The function code gets copied and installed to the database.
@@ -53,11 +55,14 @@ from typing import Dict, List
 import json
 {dedent(body)}
 return {name}({','.join(python_args)})
+{"GD['{name}'] = {name}" if global_ else ""}
 $$ LANGUAGE plpython3u
 """
 
 
-def build_pl_trigger_function(f, event, when, table=None, model=None) -> str:
+def build_pl_trigger_function(
+    f, event, when, table=None, model=None, extra_env=None
+) -> str:
     """
     Builds source code of the trigger function from the python function f.
     The source code will be copied to the trigger function and installed in the database.
@@ -68,8 +73,11 @@ def build_pl_trigger_function(f, event, when, table=None, model=None) -> str:
     @param when: contains one of BEFORE, AFTER, or INSTEAD OF
     @param table: table name the trigger will be installed on, incompatible with model argument
     @param model: django model name the trigger is to be associated with, incompatible with tabel argument
+    @param extra_env: extra environment to be passed to the pl_enable_orm function, will be dumped plaintext in the
+    text of the function!
     @return: source code of the trigger function
     """
+    extra_env = extra_env or {}
     if not table and not model:
         raise RuntimeError("Either model or table must be set for trigger installation")
 
@@ -80,6 +88,10 @@ def build_pl_trigger_function(f, event, when, table=None, model=None) -> str:
         model_name = meta.object_name
         app_name = meta.app_label
         import_statement = f"""
+extra_env = '{json.dumps(extra_env)}'
+plpy.execute(
+    "select pl_enable_orm(array{ENV_PATHS}, '{PROJECT_PATH}', '{settings.SETTINGS_MODULE}', '%s')" % extra_env
+)
 from django.apps import apps
 from django.forms.models import model_to_dict
 
