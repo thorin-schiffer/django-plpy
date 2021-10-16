@@ -1,9 +1,8 @@
 __author__ = "Thorin Schiffer"
 
 import inspect
-import json
 from functools import wraps
-from typing import Dict
+from typing import Dict, List
 
 from django.db import connection
 from django_plpy.builder import build_pl_trigger_function, build_pl_function
@@ -23,7 +22,6 @@ def install_function(f, trigger_params=None, function_params=None, cursor=None):
     """
     trigger_params = trigger_params or {}
     function_params = function_params or {}
-    print(f)
     pl_python_function = (
         build_pl_trigger_function(f, **trigger_params)
         if trigger_params
@@ -147,23 +145,27 @@ def pl_load_django(
     get_wsgi_application()
 
 
-def load_django(setting_module, project_path=None, extra_env=None):
+@plfunction(global_=True)
+def pl_enable_orm(env_paths: List[str], project_path: str, setting_module: str):
     """
     Loads django to the database interpreter.
+    @param env_paths: paths to the python library
     @param project_dir: project path
     @param django_settings_module: name of the django settings module to use
     @param extra_env: extra environment to pass to the database interpreter, like secrets
     """
-    load_env()
-    load_project(project_path)
-    install_function(pl_load_django)
-    extra_env = extra_env or {}
+    # , extra_env: Dict[str, str]
+    import sys
+    import os
 
-    with connection.cursor() as cursor:
-        cursor.execute(
-            f"select pl_load_django('{project_path}', '{setting_module}', "
-            f"'{json.dumps(extra_env)}')"
-        )
+    for path in env_paths:
+        sys.path.append(path)
+
+    from django.core.wsgi import get_wsgi_application
+
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", setting_module)
+    sys.path.append(project_path)
+    get_wsgi_application()
 
 
 def sync_functions():

@@ -18,7 +18,6 @@ from django_plpy.installer import (
     load_path,
     load_env,
     load_project,
-    load_django,
     get_python_info,
     pl_triggers,
     pl_functions,
@@ -205,16 +204,17 @@ def test_initialize_django_project(same_python_versions, pl_django):
 def pl_django(db, settings):
     load_path(os.path.join(PROJECT_PATH, "src"))
     test_db_params = connection.get_connection_params()
-    load_django(
-        "tests.testapp.settings",
-        project_path=PROJECT_PATH,
-        extra_env={
-            **os.environ,
-            "DATABASE_URL": "postgres://{user}:{password}@{host}/{database}".format(
-                **test_db_params
-            ),
-        },
-    )
+    raise NotImplementedError(test_db_params)
+    # load_django(
+    #     "tests.testapp.settings",
+    #     project_path=PROJECT_PATH,
+    #     extra_env={
+    #         **os.environ,
+    #         "DATABASE_URL": "postgres://{user}:{password}@{host}/{database}".format(
+    #             **test_db_params
+    #         ),
+    #     },
+    # )
 
 
 @fixture
@@ -225,19 +225,14 @@ def same_python_versions(db):
 
 
 @mark.django_db(transaction=True)
-def test_trigger_model(same_python_versions, pl_django):
+def test_trigger_model(same_python_versions):
+    @pltrigger(event="INSERT", when="BEFORE", model=Book)
     def pl_trigger(new: Book, old: Book, td, plpy):
         # don't use save method here, it will kill the database because of recursion
         new.name = new.name + "test"
 
-    pl_python_trigger_function = build_pl_trigger_function(
-        pl_trigger,
-        event="INSERT",
-        when="BEFORE",
-        model=Book,
-    )
-    with connection.cursor() as cursor:
-        cursor.execute(pl_python_trigger_function)
+    call_command("syncfunctions")
+
     book = Book.objects.create(name="book")
     book.refresh_from_db()
     assert book.name == "booktest"

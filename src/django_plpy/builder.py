@@ -2,7 +2,9 @@ import inspect
 from textwrap import dedent
 from typing import Dict, List
 
+from django_plpy.settings import ENV_PATHS, PROJECT_PATH
 from django_plpy.utils import remove_decorator
+from django.conf import settings
 
 type_mapper = {
     int: "integer",
@@ -81,8 +83,7 @@ def build_pl_trigger_function(f, event, when, table=None, model=None) -> str:
         model_name = meta.object_name
         app_name = meta.app_label
         import_statement = f"""
-import pl_enable_orm
-pl_enable_orm()
+plpy.execute("select pl_enable_orm(array{ENV_PATHS}, '{PROJECT_PATH}', '{settings.SETTINGS_MODULE}')")
 from django.apps import apps
 from django.forms.models import model_to_dict
 
