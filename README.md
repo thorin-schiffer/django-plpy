@@ -1,4 +1,4 @@
-Django utilities for Postgres PL/Python.
+Django utilities for Postgres PL/Python. WIP
 
 [![Maintainability](https://api.codeclimate.com/v1/badges/8fe31e70125f34ad5328/maintainability)](https://codeclimate.com/github/eviltnan/django-plpy/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/8fe31e70125f34ad5328/test_coverage)](https://codeclimate.com/github/eviltnan/django-plpy/test_coverage)
@@ -117,7 +117,7 @@ Book.objects.annotate(
 )
 ```
 
-or even declared as a custom ORM lookup:
+or even declare it as a custom ORM lookup:
 
 ```python
 from django_plpy.installer import plfunction
