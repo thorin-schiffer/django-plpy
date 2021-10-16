@@ -1,3 +1,4 @@
+import os
 from platform import python_version
 from typing import List
 
@@ -154,7 +155,7 @@ def same_python_versions(db):
 
 @mark.django_db(transaction=True)
 def test_trigger_model(same_python_versions):
-    @pltrigger(event="INSERT", when="BEFORE", model=Book)
+    @pltrigger(event="INSERT", when="BEFORE", model=Book, extra_env=dict(os.environ))
     def pl_trigger(new: Book, old: Book, td, plpy):
         # don't use save method here, it will kill the database because of recursion
         new.name = new.name + "test"

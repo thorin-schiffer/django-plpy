@@ -1,7 +1,7 @@
 import inspect
 from textwrap import dedent
 from typing import Dict, List
-
+import json
 from django_plpy.settings import ENV_PATHS, PROJECT_PATH
 from django_plpy.utils import remove_decorator
 from django.conf import settings
@@ -60,7 +60,9 @@ $$ LANGUAGE plpython3u
 """
 
 
-def build_pl_trigger_function(f, event, when, table=None, model=None) -> str:
+def build_pl_trigger_function(
+    f, event, when, table=None, model=None, extra_env=None
+) -> str:
     """
     Builds source code of the trigger function from the python function f.
     The source code will be copied to the trigger function and installed in the database.
@@ -71,8 +73,11 @@ def build_pl_trigger_function(f, event, when, table=None, model=None) -> str:
     @param when: contains one of BEFORE, AFTER, or INSTEAD OF
     @param table: table name the trigger will be installed on, incompatible with model argument
     @param model: django model name the trigger is to be associated with, incompatible with tabel argument
+    @param extra_env: extra environment to be passed to the pl_enable_orm function, will be dumped plaintext in the
+    text of the function!
     @return: source code of the trigger function
     """
+    extra_env = extra_env or {}
     if not table and not model:
         raise RuntimeError("Either model or table must be set for trigger installation")
 
@@ -83,7 +88,10 @@ def build_pl_trigger_function(f, event, when, table=None, model=None) -> str:
         model_name = meta.object_name
         app_name = meta.app_label
         import_statement = f"""
-plpy.execute("select pl_enable_orm(array{ENV_PATHS}, '{PROJECT_PATH}', '{settings.SETTINGS_MODULE}')")
+extra_env = '{json.dumps(extra_env)}'
+plpy.execute(
+    "select pl_enable_orm(array{ENV_PATHS}, '{PROJECT_PATH}', '{settings.SETTINGS_MODULE}', '%s')" % extra_env
+)
 from django.apps import apps
 from django.forms.models import model_to_dict
 

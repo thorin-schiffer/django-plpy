@@ -298,6 +298,7 @@ TODO: need command
 - including ORM will only work when django project is on the same host, which is rare. the only real way is to install
   the whole code on the db host
 - there is certain danger of getting them out of hand
+- enabling orm stores the os.environ in json in plaintext?
 - provision custom postgres container with plpythonu and your code so ORM is accessible
 - if you see this:
 

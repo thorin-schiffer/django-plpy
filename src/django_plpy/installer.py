@@ -116,7 +116,12 @@ def pl_load_django(
 
 
 @plfunction(global_=True)
-def pl_enable_orm(env_paths: List[str], project_path: str, setting_module: str):
+def pl_enable_orm(
+    env_paths: List[str],
+    project_path: str,
+    setting_module: str,
+    extra_env: Dict[str, str],
+):
     """
     Loads django to the database interpreter.
     @param env_paths: paths to the python library
@@ -124,10 +129,10 @@ def pl_enable_orm(env_paths: List[str], project_path: str, setting_module: str):
     @param django_settings_module: name of the django settings module to use
     @param extra_env: extra environment to pass to the database interpreter, like secrets
     """
-    # , extra_env: Dict[str, str]
     import sys
     import os
 
+    extra_env = extra_env or {}
     for path in env_paths:
         sys.path.append(path)
 
