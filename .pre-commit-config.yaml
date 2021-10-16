@@ -36,3 +36,8 @@ repos:
     args:
     - --ignore=D104, D100, D2, D4
     - --count
+- repo: https://github.com/hadialqattan/pycln
+  rev: v1.0.3
+  hooks:
+  - id: pycln
+    args: [--config=pyproject.toml]
