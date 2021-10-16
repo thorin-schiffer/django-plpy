@@ -6,7 +6,6 @@ from typing import Dict, List
 
 from django.db import connection
 from django_plpy.builder import build_pl_trigger_function, build_pl_function
-from django_plpy.settings import ENV_PATHS, PROJECT_PATH
 
 
 def install_function(f, trigger_params=None, function_params=None, cursor=None):
@@ -92,35 +91,6 @@ def pl_load_path(path: str):  # pragma: no cover
     import sys
 
     sys.path.append(path)
-
-
-def load_path(path):
-    """
-    Loads local path to the database's interpreter. Will only work if the database and application are on the same host.
-    @param path: local system filepath to load
-    """
-    install_function(pl_load_path)
-    with connection.cursor() as cursor:
-        cursor.execute(f"select pl_load_path('{path}')")
-
-
-def load_env():
-    """
-    Installs and loads the virtualenv of this project into the postgres interpreter.
-    """
-    raise NotImplementedError("fail on loading of an empty path")
-    for path in ENV_PATHS:
-        load_path(path)
-
-
-def load_project(path=None):
-    """
-    Load application to the database interpreter by path from PLPY_PROJECT_PATH setting. Defaults to BASE_DIR.parent.
-    @param path: path of the project, defaults to PLPY_PROJECT_PATH
-    """
-    install_function(pl_load_path)
-    path = path or PROJECT_PATH
-    load_path(path)
 
 
 # this code is only run in the database interpreter, that's why coverage doesn't see it

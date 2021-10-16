@@ -1,8 +1,6 @@
-import os
 from platform import python_version
 from typing import List
 
-import django
 from django.core.management import call_command
 from django.db import connection
 from django.db.models import Func, F, Transform
@@ -15,15 +13,11 @@ from django_plpy.installer import (
     install_function,
     plfunction,
     pltrigger,
-    load_path,
-    load_env,
-    load_project,
     get_python_info,
     pl_triggers,
     pl_functions,
 )
 from django_plpy.utils import sem_to_minor
-from django_plpy.settings import PROJECT_PATH
 from pytest import fixture, mark, skip, raises
 
 from tests.books.models import Book
@@ -114,7 +108,7 @@ def test_plfunction_decorator_registers():
             return a
         return b
 
-    assert pl_max in pl_functions.values()
+    assert pl_max, {} in pl_functions.values()
 
 
 def test_generate_trigger_function(db):
@@ -149,72 +143,6 @@ def test_pltrigger_decorator_registers():
     f, params = list(pl_triggers.values())[0]
     assert f.__name__ == "pl_trigger"
     assert params == {"event": "INSERT", "when": "BEFORE", "table": "books_book"}
-
-
-def test_use_env(db):
-    load_env()
-
-    def pl_test_use_env() -> str:
-        import django
-
-        return django.VERSION
-
-    with connection.cursor() as cursor:
-        install_function(pl_test_use_env, cursor=cursor)
-        cursor.execute("select pl_test_use_env()")
-        row = cursor.fetchone()
-    assert row[0] == str(django.VERSION)
-
-
-def test_import_project(db):
-    load_project()
-
-    def pl_test_import_project() -> int:
-        from tests.testapp import import_module
-
-        return import_module.pl_max(10, 20)
-
-    install_function(pl_test_import_project)
-    with connection.cursor() as cursor:
-        cursor.execute("select pl_test_import_project()")
-        row = cursor.fetchone()
-    assert row[0] == 20
-
-
-@mark.django_db(transaction=True)
-def test_initialize_django_project(same_python_versions, pl_django):
-    # this is needed because the request within the trigger won't see the changes if the db is not transactional
-    Book.objects.all().delete()
-    Book.objects.create(name="test")
-
-    def pl_test_import_project() -> int:
-        from tests.books.models import Book
-
-        # still uses tcp connection with postgres itself
-        return Book.objects.count()
-
-    install_function(pl_test_import_project)
-    with connection.cursor() as cursor:
-        cursor.execute("select pl_test_import_project()")
-        row = cursor.fetchone()
-    assert row[0] == 1
-
-
-@fixture
-def pl_django(db, settings):
-    load_path(os.path.join(PROJECT_PATH, "src"))
-    test_db_params = connection.get_connection_params()
-    raise NotImplementedError(test_db_params)
-    # load_django(
-    #     "tests.testapp.settings",
-    #     project_path=PROJECT_PATH,
-    #     extra_env={
-    #         **os.environ,
-    #         "DATABASE_URL": "postgres://{user}:{password}@{host}/{database}".format(
-    #             **test_db_params
-    #         ),
-    #     },
-    # )
 
 
 @fixture
