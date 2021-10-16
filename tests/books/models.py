@@ -15,13 +15,6 @@ def pl_trigger(td, plpy):
     td["new"]["name"] = td["new"]["name"] + "test"
 
 
-@plfunction
-def pl_test_django():
-    import django
-
-    print(django)
-
-
 class Book(Model):
     name = CharField(max_length=10)
     amount_stock = IntegerField(default=20)
