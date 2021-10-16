@@ -10,7 +10,7 @@ from django_plpy.builder import build_pl_trigger_function, build_pl_function
 from django_plpy.settings import ENV_PATHS, PROJECT_PATH
 
 
-def install_function(f, trigger_params=None, cursor=None):
+def install_function(f, trigger_params=None, function_params=None, cursor=None):
     """
     Installs function f as a trigger or stored procedure to the database. Must have a proper signature:
     - td, plpy for trigger without django ORM
@@ -22,10 +22,12 @@ def install_function(f, trigger_params=None, cursor=None):
     @param trigger_params: dict with params as accepted by build_pl_trigger_function
     """
     trigger_params = trigger_params or {}
+    function_params = function_params or {}
+    print(f)
     pl_python_function = (
         build_pl_trigger_function(f, **trigger_params)
         if trigger_params
-        else build_pl_function(f)
+        else build_pl_function(f, **function_params)
     )
     if not cursor:
         with connection.cursor() as cursor:
@@ -38,26 +40,33 @@ pl_functions = {}
 pl_triggers = {}
 
 
-def plfunction(f):
+def plfunction(*args, **parameters):
     """
     Decorator marking a function for installation with manage.py syncfunctions as a stored procedure
-    @param f: function to be installed
+    @param parameters: parameters. global_ - makes the function available to other plpy functons over GD dict
     @return: wrapped registered function
     """
 
-    @wraps(f)
-    def installed_func(*args, **kwargs):
-        return f(*args, **kwargs)
+    def _plfunction(f):
+        @wraps(f)
+        def installed_func(*args, **kwargs):
+            return f(*args, **kwargs)
 
-    module = inspect.getmodule(installed_func)
-    pl_functions[f"{module.__name__}.{installed_func.__qualname__}"] = installed_func
-    return installed_func
+        module = inspect.getmodule(installed_func)
+        pl_functions[f"{module.__name__}.{installed_func.__qualname__}"] = (
+            installed_func,
+            parameters,
+        )
+        return installed_func
+
+    return _plfunction(args[0]) if args and callable(args[0]) else _plfunction
 
 
 def pltrigger(**trigger_parameters):
     """
-    Decorator marking a function for installation with manage.py syncfunctions as a trigger function
-    @param f: function to be installed
+    Decorator marking a function for installation with manage.py syncfunctions as a trigger function, see
+    build_pl_trigger_function for parameters
+    @param trigger_parameters: params of the trigger
     @return: wrapped registered function
     """
 
@@ -101,6 +110,7 @@ def load_env():
     """
     Installs and loads the virtualenv of this project into the postgres interpreter.
     """
+    raise NotImplementedError("fail on loading of an empty path")
     for path in ENV_PATHS:
         load_path(path)
 
@@ -161,10 +171,10 @@ def sync_functions():
     Installs functions decorated with @plfunction and @pltrigger to the database
     """
     for function_name, f in pl_functions.items():
-        install_function(f)
+        install_function(f[0], function_params=f[1])
 
     for function_name, f in pl_triggers.items():
-        install_function(f[0], f[1])
+        install_function(f[0], trigger_params=f[1])
 
 
 @plfunction

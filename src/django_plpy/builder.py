@@ -16,7 +16,7 @@ type_mapper = {
 }
 
 
-def build_pl_function(f) -> str:
+def build_pl_function(f, global_=False) -> str:
     """
     Builds the source code of the plpy stored procedure from the local python code.
     The function code gets copied and installed to the database.
@@ -53,6 +53,7 @@ from typing import Dict, List
 import json
 {dedent(body)}
 return {name}({','.join(python_args)})
+{"GD['{name}'] = {name}" if global_ else ""}
 $$ LANGUAGE plpython3u
 """
 
@@ -80,6 +81,8 @@ def build_pl_trigger_function(f, event, when, table=None, model=None) -> str:
         model_name = meta.object_name
         app_name = meta.app_label
         import_statement = f"""
+import pl_enable_orm
+pl_enable_orm()
 from django.apps import apps
 from django.forms.models import model_to_dict
 
