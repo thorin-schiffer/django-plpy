@@ -133,6 +133,7 @@ def pl_enable_orm(
     import os
 
     extra_env = extra_env or {}
+    os.environ.update(**extra_env)
     for path in env_paths:
         sys.path.append(path)
 
