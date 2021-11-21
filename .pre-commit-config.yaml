@@ -11,21 +11,21 @@ repos:
   - id: check-merge-conflict
   - id: check-yaml
 - repo: https://github.com/asottile/pyupgrade
-  rev: v2.23.3
+  rev: v2.29.1
   hooks:
   - id: pyupgrade
     args: [--py36-plus]
 - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
-  rev: v2.1.0
+  rev: v2.2.0
   hooks:
   - id: pretty-format-yaml
     args: [--autofix, --indent, '2']
 - repo: https://github.com/johnfraney/flake8-markdown
-  rev: v0.2.0
+  rev: v0.3.0
   hooks:
   - id: flake8-markdown
 - repo: https://github.com/ambv/black
-  rev: 21.7b0
+  rev: 21.11b1
   hooks:
   - id: black
 - repo: https://github.com/PyCQA/pydocstyle
@@ -37,7 +37,7 @@ repos:
     - --ignore=D104, D100, D2, D4
     - --count
 - repo: https://github.com/hadialqattan/pycln
-  rev: v1.0.3
+  rev: v1.1.0
   hooks:
   - id: pycln
     args: [--config=pyproject.toml]
