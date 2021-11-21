@@ -141,7 +141,7 @@ def test_pltrigger_decorator_registers():
     def pl_trigger(td, plpy):
         td["new"]["name"] = td["new"]["name"] + "test"
 
-    f, params = list(pl_triggers.values())[0]
+    f, params = list(pl_triggers.values())[1]
     assert f.__name__ == "pl_trigger"
     assert params == {"event": "INSERT", "when": "BEFORE", "table": "books_book"}
 

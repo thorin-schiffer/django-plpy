@@ -11,7 +11,7 @@ def pl_max(a: int, b: int) -> int:
 
 
 class Book(Model):
-    name = CharField(max_length=10)
+    name = CharField(max_length=100)
     amount_stock = IntegerField(default=20)
     amount_sold = IntegerField(default=10)
 
@@ -26,6 +26,6 @@ class Book(Model):
 
 
 @pltrigger(event="INSERT", when="BEFORE", model=Book)
-def pl_trigger(new: Book, old: Book, td, plpy):
+def pl_update_amount(new: Book, old: Book, td, plpy):
     # don't use save method here, it will kill the database because of recursion
-    new.name = new.name + "test"
+    new.amount_stock += 10
