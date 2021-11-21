@@ -10,11 +10,6 @@ def pl_max(a: int, b: int) -> int:
     return b
 
 
-@pltrigger(event="INSERT", when="BEFORE", table="books_book")
-def pl_trigger(td, plpy):
-    td["new"]["name"] = td["new"]["name"] + "test"
-
-
 class Book(Model):
     name = CharField(max_length=10)
     amount_stock = IntegerField(default=20)
@@ -28,3 +23,9 @@ class Book(Model):
             .get(pk=self.pk)
             .max_value
         )
+
+
+@pltrigger(event="INSERT", when="BEFORE", model=Book)
+def pl_trigger(new: Book, old: Book, td, plpy):
+    # don't use save method here, it will kill the database because of recursion
+    new.name = new.name + "test"

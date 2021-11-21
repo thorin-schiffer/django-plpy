@@ -260,25 +260,23 @@ PLPY_ENV_PATHS = ["/env"]
 PLPY_PROJECT_PATH = "/app"
 ```
 
-##### Loading env
+##### How is django model loaded
+use param model + param extra_env
+
 @plfunction or @pltrigger need a param if env needs to be used
-+ function can be made callable with function.db_call(*args, **kwargs)
 
-TODO: need command
 
-##### Loading django project and using ORM in functions and triggers
+#### + function can be made callable with function.db_call(*args, **kwargs)
 
 ##### Loading your project and using it in functions and triggers
 
-+ settings PLPY_
-+ install command
-+ trigger (https://django-pgtrigger.readthedocs.io/en/latest/tutorial.html#keeping-a-field-in-sync-with-another)
 + use python function in the bulk update function
++ django signal to pl trigger
 + install function with TD
++ views for unmanaged models + plpython function for sync?
 + load virtualenv
 + load project
 + access ORM within function
-+ some functions for django lookups
 + manage py commands
 + mind the python versions, official postgres10 is based on stretch by default which only has 3.5
 + it's easier to update python version in your env then change the python version in plpython (would need to rebuild
