@@ -52,22 +52,11 @@ Check if your local python environment is compatible with your Postgres python i
 
 Django-plpy is ready to be used.
 
-### Usage
+### Features
 
 #### Installing of python functions
 
-The main workflow for bringing python functions to the database is to decorate them with `@plpython` and call manage.py command `syncfunctions` to install them. Full annotation is needed for the proper arguments mapping to the corresponding Postgres type function signature. Currently, supported types are:
-
-```
-    int: "integer",
-    str: "varchar",
-    inspect._empty: "void",
-    Dict[str, str]: "JSONB",
-    List[str]: "varchar[]",
-    List[int]: "int[]",
-    bool: "boolean",
-    float: "real",
-```
+The main workflow for bringing python functions to the database is to decorate them with `@plpython` and call manage.py command `syncfunctions` to install them. Full annotation is needed for the proper arguments mapping to the corresponding Postgres type function signature.&#x20;
 
 Imagine a function like this:
 
@@ -88,7 +77,7 @@ Finding a maximum of two values. @plfunction decorator registers it for installa
 ./manage.py syncfynctions
 ```
 
-Now you can use it in your SQL queries:
+#### Python functions in SQL queries
 
 ```python
 from django.db import connection
@@ -99,7 +88,7 @@ with connection.cursor() as cursor:
 assert row[0] == 20
 ```
 
-Or even use as a custom function in the Django ORM:
+#### Python functions in annotations
 
 ```python
 from django.db.models import F, Func
@@ -110,7 +99,7 @@ Book.objects.annotate(
 )
 ```
 
-or even declare it as a custom ORM lookup:
+#### Using python functions for custom ORM lookups
 
 ```python
 from django_plpy.installer import plfunction
@@ -152,6 +141,8 @@ def pl_trigger(td, plpy):
     ]
 ```
 
+#### Using Django models in triggers
+
 The parameters of `@pltrigger` decorator declare the trigger parameters like event the trigger will bind to and table name. You can replace `table_name` with a model name, the table name will looked up automatically:
 
 ```python
@@ -166,15 +157,38 @@ class Book(Model):
 
 
 @pltrigger(event="INSERT", when="BEFORE", model=Book)
-def pl_trigger(td, plpy):
-    # mind triggers don't return anything
-    td["new"]["name"] = td["new"]["name"] + "test"
-    td["new"]["amount_sold"] = plpy.execute("SELECT count(*) FROM books_book")[0][
-        "count"
-    ]
+def pl_update_amount(new: Book, old: Book, td, plpy):
+    # don't use save method here, it will kill the database because of recursion
+    new.amount_stock += 10
 ```
 
 Read more about plpy triggers in the official Postgres documentation: https://www.postgresql.org/docs/13/plpython-database.html.
+
+Using Django models in triggers comes at a price, read about the details of implementation below.
+
+#### Bulk operations and triggers
+
+Python triggers are fully featured Postgres triggers, meaning they will be created for every row, unlike Django signals. So if you define a trigger with event="UPDATE" and call a bulk update on a model, the trigger will be called for all affected by the operation:
+
+```python
+@pltrigger(event="UPDATE", when="BEFORE", model=Book)
+def pl_update_amount(new: Book, old: Book, td, plpy):    
+    # don't use save method here, it will kill the database because of recursion    
+    new.amount_stock += 10
+```
+
+Update results a trigger call on every line:
+
+```python
+In [2]: Book.objects.values('amount_stock')
+Out[2]: <QuerySet [{'amount_stock': 30}, {'amount_stock': 30}, {'amount_stock': 30}]>
+
+In [3]: Book.objects.all().update(name="test")
+Out[3]: 3
+
+In [4]: Book.objects.values('amount_stock')
+Out[4]: <QuerySet [{'amount_stock': 40}, {'amount_stock': 40}, {'amount_stock': 40}]>
+```
 
 #### Manage.py commands
 
@@ -199,6 +213,38 @@ If your local python and database's python versions have different minor release
 (venv) thorin@thorin-N141CU:~/PycharmProjects/django-plpy$ ./manage.py checkenv
 Database's Python version: 3.6.9
 Postgres python and this python's versions don't match, local version: 3.7.12.Django-plpy Django ORM cannot be used in triggers.
+```
+
+####
+
+**TODO:**
+
+* django signal to pl trigger
+* install function with TD
+* views for unmanaged models + plpython function for sync?
+* load virtualenv
+* load project
+* access ORM within function
+* manage py commands
+* mind the python versions, official postgres10 is based on stretch by default which only has 3.5
+* it's easier to update python version in your env then change the python version in plpython (would need to rebuild from source)
+* in docker images python 3.7.3 was used, because it's a system version for buster
+
+### Under the hood
+
+#### Supported argument types
+
+Currently, supported types are:
+
+```
+    int: "integer",
+    str: "varchar",
+    inspect._empty: "void",
+    Dict[str, str]: "JSONB",
+    List[str]: "varchar[]",
+    List[int]: "int[]",
+    bool: "boolean",
+    float: "real",
 ```
 
 #### Using Django in PL functions and triggers
@@ -236,30 +282,7 @@ PLPY_ENV_PATHS = ["/env"]
 PLPY_PROJECT_PATH = "/app"
 ```
 
-**How is Django model loaded**
-
-use param model + param extra\_env
-
-@plfunction or @pltrigger need a param if env needs to be used
-
-**+ function can be made callable with function.db\_call(\*args, \*\*kwargs)**
-
-**Loading your project and using it in functions and triggers**
-
-* use python function in the bulk update function
-* django signal to pl trigger
-* install function with TD
-* views for unmanaged models + plpython function for sync?
-* load virtualenv
-* load project
-* access ORM within function
-* manage py commands
-* mind the python versions, official postgres10 is based on stretch by default which only has 3.5
-* it's easier to update python version in your env then change the python version in plpython (would need to rebuild from source)
-* in docker images python 3.7.3 was used, because it's a system version for buster
-
-### Under the hood
-
+*
 * considering AWS RDS
 * about python versions in postgres
 * how the code is installed
