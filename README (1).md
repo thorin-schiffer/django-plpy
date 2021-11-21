@@ -166,7 +166,7 @@ Read more about plpy triggers in the official Postgres documentation: https://ww
 
 Using Django models in triggers comes at a price, read about the details of implementation below.
 
-#### Bulk operations and triggers
+#### Bulk operations and triggers, migrations
 
 Python triggers are fully featured Postgres triggers, meaning they will be created for every row, unlike Django signals. So if you define a trigger with event="UPDATE" and call a bulk update on a model, the trigger will be called for all affected by the operation:
 
@@ -189,6 +189,32 @@ Out[3]: 3
 In [4]: Book.objects.values('amount_stock')
 Out[4]: <QuerySet [{'amount_stock': 40}, {'amount_stock': 40}, {'amount_stock': 40}]>
 ```
+
+Unlike the code of Django models or signals, triggers will also be called while migrations.
+
+#### Turning Django signals to python triggers
+
+Although Django signals are neither asynchronous nor have any ability to be executed in another thread or process, many developers mistakenly expect them to behave this way. Often it leads to a callback hell and complex execution flow. Django signals implement a dispatcher-receiver pattern and only make an impression of asynchronous execution.
+
+With django-plpy, you can quickly turn your signals into triggers and make them truly asynchronous.
+
+Before:
+
+```python
+@receiver(post_save, sender=User)
+def send_mail(sender, instance, **kwargs):
+    instance.send_mail()
+```
+
+After:
+
+```python
+@pltrigger(event="INSERT", when="AFTER", model=User)
+def pl_send_mail(new: User, old: User, td, plpy):
+    instance.send_mail()
+```
+
+
 
 #### Manage.py commands
 
@@ -215,11 +241,8 @@ Database's Python version: 3.6.9
 Postgres python and this python's versions don't match, local version: 3.7.12.Django-plpy Django ORM cannot be used in triggers.
 ```
 
-####
-
 **TODO:**
 
-* django signal to pl trigger
 * install function with TD
 * views for unmanaged models + plpython function for sync?
 * load virtualenv
@@ -237,14 +260,13 @@ Postgres python and this python's versions don't match, local version: 3.7.12.Dj
 Currently, supported types are:
 
 ```
-    int: "integer",
-    str: "varchar",
-    inspect._empty: "void",
-    Dict[str, str]: "JSONB",
-    List[str]: "varchar[]",
-    List[int]: "int[]",
-    bool: "boolean",
-    float: "real",
+int: "integer",
+str: "varchar",
+Dict[str, str]: "JSONB",
+List[str]: "varchar[]",
+List[int]: "int[]",
+bool: "boolean",
+float: "real",
 ```
 
 #### Using Django in PL functions and triggers
