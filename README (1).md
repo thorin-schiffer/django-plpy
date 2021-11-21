@@ -14,13 +14,13 @@ Django 2.2 or later, Python 3.6 or higher, Postgres 10 or higher.
 
 #### Installation
 
-PL/Python therefore django-plpy requires Postgres plugin for plpython3u. Most of the distributions provide it in their repositories, here is how you install it on ubuntu:
+PL/Python, therefore django-plpy requires Postgres plugin for plpython3u. Most of the distributions provide it in their repositories, here is how you install it on Ubuntu:
 
 ```
 apt-get -y install postgresql-plpython3-10
 ```
 
-mind the PostgreSQL version at the end.
+Mind the PostgreSQL version at the end.
 
 Install django-plpy with pip
 
@@ -56,7 +56,7 @@ Django-plpy is ready to be used.
 
 #### Installing of python functions
 
-The main workflow for bringing python functions to the database is to decorate them with `@plpython` and call manage.py command `syncfunctions` in order to install them. Full annotation is needed for the proper arguments mapping to the corresponding postgres type function signature. Currently supported types are:
+The main workflow for bringing python functions to the database is to decorate them with `@plpython` and call manage.py command `syncfunctions` to install them. Full annotation is needed for the proper arguments mapping to the corresponding Postgres type function signature. Currently, supported types are:
 
 ```
     int: "integer",
@@ -82,13 +82,13 @@ def pl_max(a: int, b: int) -> int:
     return b
 ```
 
-finding a maximum of two values. @plfunction decorator registers it for installation, if any function with that name already exists it will be overwritten. Call `syncfunctions` command to install it into the database:
+Finding a maximum of two values. @plfunction decorator registers it for installation, if any function with that name already exists it will be overwritten. Call `syncfunctions` command to install it into the database:
 
 ```
 ./manage.py syncfynctions
 ```
 
-Now you can use it in your SQL quieries:
+Now you can use it in your SQL queries:
 
 ```python
 from django.db import connection
@@ -99,7 +99,7 @@ with connection.cursor() as cursor:
 assert row[0] == 20
 ```
 
-Or even use as a custom function in the django ORM:
+Or even use as a custom function in the Django ORM:
 
 ```python
 from django.db.models import F, Func
@@ -135,7 +135,7 @@ assert Book.objects.filter(amount_stock__plsquare=400).exists()
 
 #### Installing of python triggers
 
-Triggers are a very mighty mechanism, django-plpy allows you to easily mark python function as a trigger, so some logic from your project is directly associated with the data changing events in the database.
+Triggers are a very mighty mechanism, django-plpy allows you to easily mark a python function as a trigger, so some logic from your project is directly associated with the data changing events in the database.
 
 Here is an example of a python trigger using the `@pltrigger` decorator.
 
@@ -174,9 +174,9 @@ def pl_trigger(td, plpy):
     ]
 ```
 
-Read more about plpy triggers in the official postgres documentation: https://www.postgresql.org/docs/13/plpython-database.html.
+Read more about plpy triggers in the official Postgres documentation: https://www.postgresql.org/docs/13/plpython-database.html.
 
-#### manage.py commands
+#### Manage.py commands
 
 `syncfunctions` installs functions and triggers decorated with `@plfunction` and `@pltrigger` to the database.
 
@@ -193,7 +193,7 @@ Database's Python version: 3.7.3
 Minor versions match, local version: 3.7.12. Django-plpy Django ORM can be used in triggers.
 ```
 
-If your local python and database's python versions have different minor releases, psycopg won't work, so django ORM cannot be used in triggers. This is what you will see in this case:
+If your local python and database's python versions have different minor releases, psycopg won't work, so Django ORM cannot be used in triggers. This is what you will see in this case:
 
 ```shell
 (venv) thorin@thorin-N141CU:~/PycharmProjects/django-plpy$ ./manage.py checkenv
@@ -203,31 +203,31 @@ Postgres python and this python's versions don't match, local version: 3.7.12.Dj
 
 #### Using Django in PL functions and triggers
 
-While installing with `syncfunctions` the source code of the function will be copied to a corresponding stored procedure and installed in postgres. This makes your local context not available to the functions, which means that no models or libraries can be used within the tranferred functions.
+While installing with, `syncfunctions` the source code of the function will be copied to a corresponding stored procedure and installed in Postgres. This makes your local context not available to the functions, which means that no models or libraries can be used within the transferred functions.
 
-In order to solve this problem, you need to set up your python project and environment within a postgres python interpreter. Django-plpy supports following two scenarios of how you use your database.
+To solve this problem, you need to set up your python project and environment within a Postgres python interpreter. Django-plpy supports the following two scenarios of how you use your database.
 
 **Database and application are on the same host**
 
 Rarely used nowadays, but still out there, this scenario is the simplest for the environment sharing. Django-plpy creates stored procedures and transfers the necessary configuration to the database:
 
-* secrets and database access creds
+* secrets and database access credentials
 * path to the python env (defaults to `distutils.sysconfig.get_python_lib()`, for more config see below)
-* loads django applications the way manage.py does it
+* loads Django applications the way manage.py does it
 
 **Database is in a separate docker container**
 
-More common production scenario is that the database is on a separate docker container.
+A more common production scenario is that the database is on a separate docker container.
 
 **Couple of words about docker and plpython or django-plpy**
 
-Official Postgres image doesn't support plpython plugin out of the box, so if you want to use plpython as such you would need to create your own image or use one of those provided by the maintainer of this package ( thorinschiffer/postgres-plpython:).
+The official Postgres image doesn't support plpython plugin out of the box, so if you want to use plpython as such you would need to create your image or use one of those provided by the maintainer of this package (thorinschiffer/postgres-plpython).
 
-All of the images provide python 3.7, because postgres uses the default python environment from the OS the image is based on and 3.7 is the standard for Debian Buster.
+All the images provide python 3.7 because Postgres uses the default python environment from the OS the image is based on and 3.7 is the standard for Debian Buster.
 
 **Using django-plpy with dockerized Postgres**
 
-To make the code available to the Postgres python interpreter, it has to somehow appear within the docker container. You can either provision the image with it while building if you decided to write your own docker image / dockerfile or you can share the code using volumes.
+To make the code available to the Postgres python interpreter, it has to somehow appear within the docker container. You can either provision the image with it while building if you decided to write your docker image / dockerfile, or you can share the code using volumes.
 
 Once the code and environment exist somewhere within the Docker container, django-plpy can be told to use them: So if your environment lives under `/env` (copy site-packages folder to this path) and your app within `/app`, add following settings to your `settings.py`
 
@@ -236,7 +236,7 @@ PLPY_ENV_PATHS = ["/env"]
 PLPY_PROJECT_PATH = "/app"
 ```
 
-**How is django model loaded**
+**How is Django model loaded**
 
 use param model + param extra\_env
 
