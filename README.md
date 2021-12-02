@@ -229,8 +229,6 @@ def pl_send_mail(new: User, old: User, td, plpy):
     new.send_mail()
 ```
 
-
-
 #### Manage.py commands
 
 `syncfunctions` installs functions and triggers decorated with `@plfunction` and `@pltrigger` to the database.
@@ -255,18 +253,6 @@ If your local python and database's python versions have different minor release
 Database's Python version: 3.6.9
 Postgres python and this python's versions don't match, local version: 3.7.12.Django-plpy Django ORM cannot be used in triggers.
 ```
-
-**TODO:**
-
-* install function with TD
-* views for unmanaged models + plpython function for sync?
-* load virtualenv
-* load project
-* access ORM within function
-* manage py commands
-* mind the python versions, official postgres10 is based on stretch by default which only has 3.5
-* it's easier to update python version in your env then change the python version in plpython (would need to rebuild from source)
-* in docker images python 3.7.3 was used, because it's a system version for buster
 
 ### Under the hood
 
@@ -319,32 +305,51 @@ PLPY_ENV_PATHS = ["/env"]
 PLPY_PROJECT_PATH = "/app"
 ```
 
-*
-* considering AWS RDS
-* about python versions in postgres
-* how the code is installed
-* often django beginners misunderstand signals concept
-* add sorting example with a custom python function
-* plpy example for triggers
-* if you see `Error loading psycopg2 module: No module named 'psycopg2._psycopg'`, your local python and db's versions don't match
-* including ORM will only work when django project is on the same host, which is rare. the only real way is to install the whole code on the db host
-* there is certain danger of getting them out of hand
-* enabling orm stores the os.environ in json in plaintext?
-* provision custom postgres container with plpythonu and your code so ORM is accessible
-* if you see this:
+#### AWS RDS and other managed databases
+
+In the times of Saas there databases are rarely connected in a docker image but much
+more frequently in a managed database like AWS RDS.
+Django-plpy can be only install simple functions and triggers in such instances, because
+there is no access to the database's filesystem in such setup.
+
+Besides that some managed databases won't give you superuser rights, meaning installing
+extensions in such a scenario will be troublesome.
+
+
+#### How the code is installed
+
+Django-plpy copies the function code, wraps it in a PL/Python stored procedure or trigger
+and then installs it with `manage.py syncfunctions`.
+If you use Django models, database has to have access to your project file and virtualenv (see above),
+or if you create your own database docker image, it has to be provisioned correspondingly.
+This scenario seems quite exotic, and you do it on your own risk.
+
+#### Troubleshooting
+
+If you see `Error loading psycopg2 module: No module named 'psycopg2._psycopg'`, your local python and db's versions don't match.
+Check your python versions with `manage.py checkenv`
+
+If you see this:
 
 ```
 django.db.utils.ProgrammingError: language "plpython3u" does not exist
 HINT:  Use CREATE LANGUAGE to load the language into the database.
 ```
 
-you haven't migrated
+you haven't migrated: `manage.py migrate`
+#### Caveats
 
-* python versions is a mess in debian, use pyenv in docker images for plpython?
-* environment / interpreter context persistence and database restart
-* start database functions with plpy\_ prefix to be sure they are not executed locally
+Custom functions and triggers are not a part of Django ORM and can get out of hand, name collisions are not checked explicitely for now.
 
-### contribution
+For now enabling orm stores the os.environ in json in plaintext in the trigger function text, so this feature is
+considered quite experimental.
+
+There were no real performance tests made, so this is for you to find out.
+Currently only python3.7 is supported with Django ORM, as it is a current version in the Debian based python images,
+that are default. There is an opportunity to build an image with a custom python verson and postgres version, but
+it seems a total overkill assuming all the problems with Django ORM, see above.
+
+Prepend database functions with plpy_ prefix to be sure they are not executed locally.
 
 ### Installation for development
 
