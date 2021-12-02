@@ -350,6 +350,7 @@ that are default. There is an opportunity to build an image with a custom python
 it seems a total overkill assuming all the problems with Django ORM, see above.
 
 Prepend database functions with plpy_ prefix to be sure they are not executed locally.
+Django-plpy won't remove any triggers, you will have to take care of the stale triggers yourself.
 
 ### Installation for development
 
