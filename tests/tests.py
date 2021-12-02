@@ -163,13 +163,13 @@ def test_trigger_model(same_python_versions):
     @pltrigger(event="INSERT", when="BEFORE", model=Book, extra_env=dict(os.environ))
     def pl_trigger_trigger_model(new: Book, old: Book, td, plpy):
         # don't use save method here, it will kill the database because of recursion
-        new.name = new.name + "test"
+        new.amount_stock = 123
 
     call_command("syncfunctions")
 
     book = Book.objects.create(name="book")
     book.refresh_from_db()
-    assert book.name == "booktest"
+    assert book.amount_stock == 123
 
 
 def test_function_different_arguments(db):
