@@ -44,6 +44,7 @@ $$ LANGUAGE plpython3u;
 
 @fixture(autouse=True)
 def clean_triggers_and_functions(db):
+    yield
     with connection.cursor() as cursor:
         cursor.execute(
             "DROP TRIGGER IF EXISTS pl_trigger_trigger ON books_book CASCADE;"
@@ -163,13 +164,13 @@ def test_trigger_model(same_python_versions):
     @pltrigger(event="INSERT", when="BEFORE", model=Book, extra_env=dict(os.environ))
     def pl_trigger_trigger_model(new: Book, old: Book, td, plpy):
         # don't use save method here, it will kill the database because of recursion
-        new.amount_stock = 123
+        new.amount_sold = 123
 
     call_command("syncfunctions")
 
     book = Book.objects.create(name="book")
     book.refresh_from_db()
-    assert book.amount_stock == 123
+    assert book.amount_sold == 123
 
 
 def test_function_different_arguments(db):
