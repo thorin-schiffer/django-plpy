@@ -14,6 +14,7 @@ class Book(Model):
     name = CharField(max_length=100)
     amount_stock = IntegerField(default=20)
     amount_sold = IntegerField(default=10)
+    stock_days_left = IntegerField(null=True, blank=True)
 
     def get_max(self):
         return (
@@ -25,7 +26,13 @@ class Book(Model):
         )
 
 
-@pltrigger(event="INSERT", when="BEFORE", model=Book)
+@pltrigger(event="UPDATE", when="BEFORE", model=Book)
 def pl_update_amount(new: Book, old: Book, td, plpy):
     # don't use save method here, it will kill the database because of recursion
     new.amount_stock += 10
+
+
+@pltrigger(event="UPDATE", when="BEFORE", model=Book)
+def stock_days_left(new: Book, old: Book, td, plpy):
+    # don't use save method here, it will kill the database because of recursion
+    new.stock_days_left = int(new.amount_stock / new.amount_sold)
