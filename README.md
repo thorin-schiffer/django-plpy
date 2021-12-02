@@ -357,3 +357,5 @@ Django-plpy won't remove any triggers, you will have to take care of the stale t
 Install project locally: `pip install -e .`
 
 Django-plpy [django-environ](https://github.com/joke2k/django-environ) for passing the necessary env over dotenv, database for creds in particular. See .env\_template for possible env variables.
+
+### Changelog
