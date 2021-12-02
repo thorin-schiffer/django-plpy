@@ -138,11 +138,13 @@ def test_generate_trigger_function(db):
 
 def test_pltrigger_decorator_registers():
     @pltrigger(event="INSERT", when="BEFORE", table="books_book")
-    def pl_trigger(td, plpy):
+    def pl_trigger_test_decorator_registers(td, plpy):
         td["new"]["name"] = td["new"]["name"] + "test"
 
     f, params = next(
-        x for x in list(pl_triggers.values()) if x[0].__name__ == "pl_trigger"
+        x
+        for x in list(pl_triggers.values())
+        if x[0].__name__ == "pl_trigger_test_decorator_registers"
     )
     assert params["event"] == "INSERT"
     assert params["when"] == "BEFORE"
