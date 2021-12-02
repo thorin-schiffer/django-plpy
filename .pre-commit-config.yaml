@@ -21,10 +21,6 @@ repos:
   hooks:
   - id: pretty-format-yaml
     args: [--autofix, --indent, '2']
-- repo: https://github.com/johnfraney/flake8-markdown
-  rev: v0.3.0
-  hooks:
-  - id: flake8-markdown
 - repo: https://github.com/ambv/black
   rev: 21.11b1
   hooks:
