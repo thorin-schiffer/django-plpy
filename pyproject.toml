@@ -10,3 +10,30 @@ local_scheme= "no-local-version"
 
 [tool.pycln]
 all = true
+
+[tool.flake8]
+exclude = ".git,__pycache__,docs/source/conf.py,old,build,dist,*/migrations/*,*/settings/*,*.wsgi"
+max-complexity = 10
+max-line-length = 120
+
+[tool.coverage.paths]
+source = ["src", "*/site-packages"]
+
+[tool.coverage.run]
+branch = true
+source = ["django_plpy"]
+omit = ["*/tests/*", "*/migrations/*", "*/urls.py", "*/settings.py", "*/asgi.py", "manage.py", "setup.py"]
+
+[tool.coverage.report]
+# Regexes for lines to exclude from consideration
+exclude_lines = [
+"pragma: no cover",
+"def __repr__",
+"raise AssertionError",
+"raise NotImplementedError",
+"if 0:",
+"if __name__ == .__main__.:",
+]
+skip_covered = true
+sort = "Miss"
+ignore_errors = true
