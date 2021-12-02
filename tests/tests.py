@@ -139,7 +139,7 @@ def test_generate_trigger_function(db):
 def test_pltrigger_decorator_registers():
     @pltrigger(event="INSERT", when="BEFORE", table="books_book")
     def pl_trigger_test_decorator_registers(td, plpy):
-        td["new"]["name"] = td["new"]["name"] + "test"
+        pass
 
     f, params = next(
         x
@@ -161,7 +161,7 @@ def same_python_versions(db):
 @mark.django_db(transaction=True)
 def test_trigger_model(same_python_versions):
     @pltrigger(event="INSERT", when="BEFORE", model=Book, extra_env=dict(os.environ))
-    def pl_trigger(new: Book, old: Book, td, plpy):
+    def pl_trigger_trigger_model(new: Book, old: Book, td, plpy):
         # don't use save method here, it will kill the database because of recursion
         new.name = new.name + "test"
 
