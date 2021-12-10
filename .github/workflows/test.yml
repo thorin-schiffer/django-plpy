@@ -58,7 +58,7 @@ jobs:
         pip install -e .
         pytest --junitxml=test-results/junit.xml --cov-report=xml --cov=. .
     - name: Report coverage
-      run: GIT_BRANCH=$GITHUB_REF GIT_COMMIT_SHA=$GITHUB_SHA ./cc-test-reporter after-build --exit-code $?
-      if: matrix.python-version == 3.7 && matrix.postgres-version == 13 && matrix.django-version-number == 3
+      uses: paambaati/codeclimate-action@v3.0.0
       env:
         CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+      if: matrix.python-version == 3.7 && matrix.postgres-version == 13 && matrix.django-version-number == 3
