@@ -1,6 +1,6 @@
 # README
 
-Django utilities for Postgres PL/Python. WIP
+Django utilities for Postgres PL/Python
 
 [![Maintainability](https://api.codeclimate.com/v1/badges/8fe31e70125f34ad5328/maintainability)](https://codeclimate.com/github/eviltnan/django-plpy/maintainability) [![Test Coverage](https://api.codeclimate.com/v1/badges/8fe31e70125f34ad5328/test\_coverage)](https://codeclimate.com/github/eviltnan/django-plpy/test\_coverage) [![test](https://github.com/eviltnan/django-plpy/actions/workflows/test.yml/badge.svg)](https://github.com/eviltnan/django-plpy/actions/workflows/test.yml) [![lint](https://github.com/eviltnan/django-plpy/actions/workflows/lint.yml/badge.svg)](https://github.com/eviltnan/django-plpy/actions/workflows/lint.yml) [![PyPI version](https://badge.fury.io/py/django-plpy.svg)](https://badge.fury.io/py/django-plpy)
 
