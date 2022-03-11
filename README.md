@@ -74,7 +74,7 @@ def pl_max(a: int, b: int) -> int:
 Finding a maximum of two values. @plfunction decorator registers it for installation, if any function with that name already exists it will be overwritten. Call `syncfunctions` command to install it into the database:
 
 ```
-./manage.py syncfynctions
+./manage.py syncfunctions
 ```
 
 #### Python functions in SQL queries
